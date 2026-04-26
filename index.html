@@ -639,6 +639,131 @@ tr.avg-row td:first-child {
 .section-tab:hover { border-color: var(--text2); color: var(--text); }
 .section-tab.active { color: #000; border-color: transparent; }
 
+/* ─── HAMBURGER & MOBILE MENU ─── */
+.hamburger-btn {
+  display: none;
+  flex-direction: column; justify-content: center; align-items: center;
+  gap: 5px; width: 40px; height: 40px;
+  background: none; border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); cursor: pointer;
+  padding: 8px;
+}
+.hamburger-btn span {
+  display: block; width: 18px; height: 2px;
+  background: var(--text2); border-radius: 2px;
+  transition: var(--transition);
+}
+.hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger-btn.open span:nth-child(2) { opacity: 0; }
+.hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+#mobile-overlay {
+  display: none; position: fixed; inset: 0; z-index: 199;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+}
+#mobile-overlay.open { display: block; }
+
+#mobile-menu {
+  position: fixed; top: 0; right: -320px; bottom: 0; z-index: 200;
+  width: 300px; max-width: 85vw;
+  background: var(--card);
+  border-left: 1px solid var(--border2);
+  display: flex; flex-direction: column;
+  transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
+  overflow-y: auto;
+}
+#mobile-menu.open { right: 0; }
+
+.mobile-menu-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px; border-bottom: 1px solid var(--border);
+}
+.mobile-menu-season { padding: 12px 20px; border-bottom: 1px solid var(--border); }
+.mobile-nav { display: flex; flex-direction: column; gap: 4px; padding: 12px; flex: 1; }
+.mobile-nav-btn {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border: none; background: none;
+  color: var(--text2); font-size: 15px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  border-radius: var(--radius-sm); cursor: pointer;
+  text-align: left; transition: var(--transition);
+}
+.mobile-nav-btn:hover { background: var(--card2); color: var(--text); }
+.mobile-nav-btn.active { background: var(--gold-dim); color: var(--gold); }
+.mobile-menu-actions { padding: 16px 20px; border-top: 1px solid var(--border); }
+
+/* ─── MOBILE RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .hamburger-btn { display: flex; }
+  .desktop-only { display: none !important; }
+  .nav-tabs { display: none; }
+
+  /* Season selector in nav - hide desktop one */
+  .topnav > div:nth-child(2) { display: none; }
+
+  /* Views */
+  .view { padding: 16px 14px; }
+  .page-title { font-size: 28px; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+
+  /* Stats rows */
+  .stats-row { grid-template-columns: 1fr 1fr; }
+
+  /* Rekordna kola - stack vertically */
+  #rekordna-kola-row { grid-template-columns: 1fr !important; }
+
+  /* Skupaj grid */
+  .skupaj-grid { grid-template-columns: 1fr; }
+
+  /* Ranking */
+  .rank-bar-wrap { display: none; }
+  .rank-val { width: 44px; font-size: 16px; }
+
+  /* Tables */
+  .table-wrap { border-radius: var(--radius-sm); }
+  th, td { padding: 6px 4px; font-size: 11px; }
+  th:first-child, td:first-child { width: 120px; min-width: 110px; padding-left: 10px; }
+  .att-cell { width: 36px; height: 24px; font-size: 10px; }
+
+  /* Section tabs */
+  .section-tabs { gap: 4px; }
+  .section-tab { padding: 5px 10px; font-size: 11px; }
+
+  /* Charts */
+  .chart-container { height: 200px; }
+
+  /* Stat cards */
+  .stat-card { padding: 12px; }
+  .stat-val { font-size: 24px; }
+
+  /* Team modal */
+  .team-modal-box { padding: 20px; }
+  .team-modal-name { font-size: 26px; }
+  .team-stats { grid-template-columns: 1fr 1fr; }
+
+  /* Statistika */
+  #rekord-liga1, #rekord-liga2, #rekord-liga3 { display: none; }
+
+  /* Napredna - heatmap scroll */
+  #heatmap-container { overflow-x: auto; }
+
+  /* Login */
+  .login-cards { flex-direction: column; align-items: center; }
+  .login-card { min-width: 240px; }
+
+  /* Nav brand smaller */
+  .nav-brand { font-size: 16px; margin-right: 12px; }
+
+  /* Admin */
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .stats-row { grid-template-columns: 1fr; }
+  .page-title { font-size: 24px; }
+  .nav-brand { font-size: 14px; }
+}
+
 /* ─── LIGA COLOR CLASSES ─── */
 .liga-1 { background: var(--blue-dim); color: var(--blue); border-color: rgba(59,130,246,0.3); }
 .liga-2 { background: var(--green-dim); color: var(--green); border-color: rgba(16,185,129,0.3); }
@@ -715,10 +840,41 @@ tr.avg-row td:first-child {
     </div>
     <div class="nav-right">
       <div class="admin-badge admin-only" style="display:none" id="admin-badge">⚙️ Admin</div>
-      <button class="logout-btn" onclick="fetchAndRefresh()" title="Osveži podatke iz Google Sheets" style="border-color:var(--gold);color:var(--gold)">⟳ Osveži</button>
-      <button class="logout-btn" onclick="logout()">Izhod</button>
+      <button class="logout-btn desktop-only" onclick="fetchAndRefresh()" title="Osveži podatke iz Google Sheets" style="border-color:var(--gold);color:var(--gold)">⟳ Osveži</button>
+      <button class="logout-btn desktop-only" onclick="logout()">Izhod</button>
+      <button class="hamburger-btn" onclick="toggleMobileMenu()" id="hamburger-btn" aria-label="Meni">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </nav>
+
+  <!-- Mobile menu overlay -->
+  <div id="mobile-overlay" onclick="closeMobileMenu()"></div>
+  <div id="mobile-menu">
+    <div class="mobile-menu-header">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.05em">Obiski <span style="color:var(--gold)">Tekem</span></div>
+      <button onclick="closeMobileMenu()" style="background:none;border:none;color:var(--text2);font-size:24px;cursor:pointer;padding:4px">✕</button>
+    </div>
+    <div class="mobile-menu-season">
+      <select id="season-select-mobile" onchange="switchSeason(this.value);document.getElementById('season-select').value=this.value;"
+        style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;color:var(--gold);font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;outline:none;width:100%;">
+        <option value="2025/26">2025/26 ★</option>
+      </select>
+    </div>
+    <nav class="mobile-nav">
+      <button class="mobile-nav-btn active" data-view="skupaj" onclick="mobileNav(this)">📊 Skupaj</button>
+      <button class="mobile-nav-btn" data-view="liga1" onclick="mobileNav(this)">🔵 1. Liga</button>
+      <button class="mobile-nav-btn" data-view="liga2" onclick="mobileNav(this)">🟢 2. Liga</button>
+      <button class="mobile-nav-btn" data-view="liga3" onclick="mobileNav(this)">🟡 3. Liga</button>
+      <button class="mobile-nav-btn" data-view="statistika" onclick="mobileNav(this)">📈 Statistika</button>
+      <button class="mobile-nav-btn" data-view="napredna" onclick="mobileNav(this)">🔢 Napredna stat.</button>
+      <button class="mobile-nav-btn admin-only" data-view="admin" onclick="mobileNav(this)" style="display:none">⚙️ Admin</button>
+    </nav>
+    <div class="mobile-menu-actions">
+      <button onclick="fetchAndRefresh();closeMobileMenu();" style="width:100%;padding:12px;background:var(--gold-dim);border:1px solid rgba(240,165,0,0.3);border-radius:var(--radius-sm);color:var(--gold);font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:8px">⟳ Osveži podatke</button>
+      <button onclick="logout();closeMobileMenu();" style="width:100%;padding:12px;background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer">Izhod</button>
+    </div>
+  </div>
 
   <!-- ── SKUPAJ VIEW ── -->
   <div class="view active" id="view-skupaj">
@@ -1216,6 +1372,7 @@ function checkPwd() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').classList.add('visible');
     document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
+    syncMobileAdminButtons();
     document.getElementById('admin-api-key').value = CONFIG.API_KEY;
     showApiBannerIfNeeded();
     renderAll();
@@ -1229,6 +1386,7 @@ function checkPwd() {
 function logout() {
   isAdmin = false;
   document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+  syncMobileAdminButtons();
   document.getElementById('app').classList.remove('visible');
   document.getElementById('login-screen').style.display = 'flex';
   switchTab('skupaj');
@@ -1926,6 +2084,46 @@ async function fetchAndRefresh() {
   }
   document.getElementById('api-banner').style.display = 'none';
   renderAll();
+}
+
+// ══════════ MOBILE MENU ══════════
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobile-menu');
+  const overlay = document.getElementById('mobile-overlay');
+  const btn = document.getElementById('hamburger-btn');
+  const isOpen = menu.classList.contains('open');
+  if (isOpen) {
+    menu.classList.remove('open');
+    overlay.classList.remove('open');
+    btn.classList.remove('open');
+  } else {
+    menu.classList.add('open');
+    overlay.classList.add('open');
+    btn.classList.add('open');
+  }
+}
+
+function closeMobileMenu() {
+  document.getElementById('mobile-menu').classList.remove('open');
+  document.getElementById('mobile-overlay').classList.remove('open');
+  document.getElementById('hamburger-btn').classList.remove('open');
+}
+
+function mobileNav(btn) {
+  const view = btn.dataset.view;
+  switchTab(view);
+  // Sync desktop tabs
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+  // Sync mobile buttons
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  closeMobileMenu();
+}
+
+// Sync mobile admin buttons visibility
+function syncMobileAdminButtons() {
+  document.querySelectorAll('.mobile-nav-btn.admin-only').forEach(el => {
+    el.style.display = isAdmin ? '' : 'none';
+  });
 }
 
 // ══════════ RENDER ALL ══════════
