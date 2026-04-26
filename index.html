@@ -1434,7 +1434,7 @@ async function hitriVnos() {
   const roundIdx = document.getElementById('hitri-kolo').value;
   const gledalci = document.getElementById('hitri-gledalci').value;
 
-  if (!lgName || teamIdx === '' || roundIdx === '' || !gledalci) {
+  if (!lgName || teamIdx === '' || roundIdx === '' || gledalci === '') {
     status.textContent = '⚠️ Izpolni vsa polja!';
     status.className = 'save-status err';
     return;
@@ -1445,33 +1445,47 @@ async function hitriVnos() {
   const round = lg.rounds[parseInt(roundIdx)];
   const val = parseInt(gledalci);
 
-  // Posodobi lokalne podatke
+  // Posodobi lokalno
   team.data[parseInt(roundIdx)] = val;
-
-  status.textContent = '⏳ Shranjujem...';
-  status.className = 'save-status';
-
-  // Shrani v Sheets
-  const payload = encodeURIComponent(JSON.stringify({ liga: lgName, teams: lg.teams }));
-  await fetch(`${CONFIG.APPS_SCRIPT_URL}?payload=${payload}`, { mode: 'no-cors' });
-
-  await new Promise(r => setTimeout(r, 1500));
-  await fetchAndRefresh();
-
-  status.textContent = `✓ ${team.name} — ${round}: ${fmtNum(val)} gledalcev`;
-  status.className = 'save-status ok';
-
-  // Počisti forma
-  document.getElementById('hitri-gledalci').value = '';
-  document.getElementById('hitri-preview').style.display = 'none';
-  document.getElementById('kzs-url').value = '';
-
-  setTimeout(() => { status.textContent = ''; }, 5000);
-
-  // Osveži tabelo
   renderLeagueTable(lgName, `liga${lgName[0]}-table`, `liga${lgName[0]}-stats`);
   renderSkupaj();
   if (isAdmin) renderAdminTable();
+
+  status.textContent = '⏳ Shranjujem v Sheets...';
+  status.className = 'save-status';
+
+  // Pošlji samo eno celico (majhen payload!)
+  const ok = await saveSingleCell(lgName, team.name, parseInt(roundIdx), val);
+
+  if (ok) {
+    status.textContent = `✓ ${team.name} — ${round}: ${fmtNum(val)} gledalcev`;
+    status.className = 'save-status ok';
+    document.getElementById('hitri-gledalci').value = '';
+    document.getElementById('hitri-preview').style.display = 'none';
+    document.getElementById('kzs-url').value = '';
+    setTimeout(() => { status.textContent = ''; }, 5000);
+  } else {
+    status.textContent = '✗ Napaka pri shranjevanju';
+    status.className = 'save-status err';
+  }
+}
+
+async function saveSingleCell(liga, teamName, roundIdx, val) {
+  try {
+    const params = new URLSearchParams({
+      action: 'cell',
+      liga: liga,
+      team: teamName,
+      round: roundIdx,
+      val: val
+    });
+    await fetch(`${CONFIG.APPS_SCRIPT_URL}?${params.toString()}`, { mode: 'no-cors' });
+    await new Promise(r => setTimeout(r, 1000));
+    return true;
+  } catch(e) {
+    console.error('saveSingleCell error:', e);
+    return false;
+  }
 }
 
 // ══════════ ADMIN TABLE ══════════
@@ -1514,19 +1528,29 @@ function updateData(input) {
 
 async function saveAdminData() {
   const status = document.getElementById('save-status');
-  status.textContent = '⏳ Shranjujem v Google Sheets...';
+  const lgName = document.getElementById('admin-liga').value;
+  const lg = LEAGUE_DATA[lgName];
+
+  // Zberi samo celice z vrednostjo (kompakten payload)
+  const cells = [];
+  lg.teams.forEach(team => {
+    team.data.forEach((val, ri) => {
+      if (val !== null && val !== undefined) {
+        cells.push({ team: team.name, round: ri, val });
+      }
+    });
+  });
+
+  status.textContent = `⏳ Shranjujem ${cells.length} celic...`;
   status.className = 'save-status';
+
   try {
-    const lgName = document.getElementById('admin-liga').value;
-    const lg = LEAGUE_DATA[lgName];
-    // Apps Script zahteva no-cors + form data (ne JSON) za cross-origin POST
-    // Pošljemo kot form z JSON v enem polju
-    // GET request - edini zanesljiv način za Apps Script brez CORS napak
-    const payload = encodeURIComponent(JSON.stringify({ liga: lgName, teams: lg.teams }));
-    await fetch(`${CONFIG.APPS_SCRIPT_URL}?payload=${payload}`, { mode: 'no-cors' });
-    // no-cors vedno vrne opaque response, ne moremo preveriti status
-    // Počakamo 1s in osvežimo iz Sheets kot potrditev
-    status.textContent = '⏳ Preverjam...';
+    const params = new URLSearchParams({
+      action: 'batch',
+      liga: lgName,
+      cells: JSON.stringify(cells)
+    });
+    await fetch(`${CONFIG.APPS_SCRIPT_URL}?${params.toString()}`, { mode: 'no-cors' });
     await new Promise(r => setTimeout(r, 1500));
     await fetchAndRefresh();
     status.textContent = '✓ Shranjeno in posodobljeno!';
