@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Obiski tekem — Slovenska košarka</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #07090f;
+  --bg2: #0d1220;
+  --bg3: #131a2e;
+  --card: #111827;
+  --card2: #1a2235;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --gold: #f0a500;
+  --gold-dim: rgba(240,165,0,0.12);
+  --gold-glow: rgba(240,165,0,0.35);
+  --blue: #3b82f6;
+  --blue-dim: rgba(59,130,246,0.12);
+  --green: #10b981;
+  --green-dim: rgba(16,185,129,0.12);
+  --amber: #f59e0b;
+  --amber-dim: rgba(245,158,11,0.12);
+  --red: #ef4444;
+  --text: #e8edf5;
+  --text2: #8899b0;
+  --text3: #4a5a70;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-gold: 0 0 30px rgba(240,165,0,0.15);
+  --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── LOGIN ─── */
+#login-screen {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.login-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 50%, rgba(240,165,0,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 30%, rgba(59,130,246,0.05) 0%, transparent 60%);
+}
+
+.login-grid {
+  position: absolute; inset: 0; opacity: 0.03;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.login-box {
+  position: relative; z-index: 1;
+  text-align: center;
+  animation: fadeUp 0.6s ease both;
+}
+
+.login-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--gold-dim);
+  border: 1px solid rgba(240,165,0,0.3);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.15em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.login-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(52px, 10vw, 96px);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.login-title span { color: var(--gold); }
+
+.login-sub {
+  font-size: 15px; color: var(--text2); font-weight: 400;
+  letter-spacing: 0.05em;
+  margin-bottom: 48px;
+}
+
+.login-cards {
+  display: flex; gap: 16px; justify-content: center;
+  flex-wrap: wrap;
+}
+
+.login-card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 28px 36px;
+  cursor: pointer;
+  transition: var(--transition);
+  min-width: 180px;
+}
+
+.login-card:hover {
+  border-color: var(--gold);
+  background: var(--card2);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-gold);
+}
+
+.login-card .icon {
+  font-size: 32px; margin-bottom: 12px;
+}
+
+.login-card .label {
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text2);
+}
+
+.login-card .title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; letter-spacing: 0.05em;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+/* Password modal */
+#pwd-modal {
+  position: fixed; inset: 0; z-index: 2000;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+}
+#pwd-modal.open { display: flex; }
+
+.modal-box {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 36px;
+  width: 340px;
+  animation: fadeUp 0.2s ease both;
+}
+
+.modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; letter-spacing: 0.05em;
+  margin-bottom: 20px;
+}
+
+.input-row { margin-bottom: 16px; }
+.input-row label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+.input-row input {
+  width: 100%; background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px;
+  outline: none;
+  transition: var(--transition);
+}
+.input-row input:focus { border-color: var(--gold); }
+
+.modal-error { color: var(--red); font-size: 13px; margin-bottom: 12px; display: none; }
+.modal-error.show { display: block; }
+
+.btn-row { display: flex; gap: 10px; }
+.btn {
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+  transition: var(--transition);
+}
+.btn-primary { background: var(--gold); color: #000; flex: 1; }
+.btn-primary:hover { background: #ffb800; }
+.btn-ghost { background: var(--border); color: var(--text2); }
+.btn-ghost:hover { background: var(--border2); color: var(--text); }
+
+/* ─── MAIN APP ─── */
+#app { display: none; min-height: 100vh; flex-direction: column; }
+#app.visible { display: flex; }
+
+/* Top nav */
+.topnav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(7,9,15,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex; align-items: center; gap: 0;
+}
+
+.nav-brand {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; letter-spacing: 0.05em;
+  color: var(--text);
+  margin-right: 32px;
+  white-space: nowrap;
+  padding: 16px 0;
+}
+.nav-brand span { color: var(--gold); }
+
+.nav-tabs {
+  display: flex; gap: 0; flex: 1; overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-tabs::-webkit-scrollbar { display: none; }
+
+.nav-tab {
+  padding: 18px 20px;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text3); cursor: pointer; border: none; background: none;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: var(--transition);
+  position: relative;
+}
+.nav-tab:hover { color: var(--text2); }
+.nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+.nav-right {
+  display: flex; align-items: center; gap: 12px; margin-left: 16px;
+}
+
+.admin-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--gold-dim);
+  border: 1px solid rgba(240,165,0,0.3);
+  border-radius: 100px;
+  padding: 4px 12px;
+  font-size: 11px; font-weight: 600; color: var(--gold);
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+.logout-btn {
+  padding: 6px 14px;
+  background: none; border: 1px solid var(--border2);
+  border-radius: 100px; color: var(--text2); cursor: pointer;
+  font-size: 12px; font-weight: 500;
+  transition: var(--transition);
+}
+.logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+/* ─── VIEWS ─── */
+.view { display: none; padding: 28px 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
+.view.active { display: block; }
+
+/* ─── API CONFIG BANNER ─── */
+.api-banner {
+  background: rgba(240,165,0,0.08);
+  border: 1px solid rgba(240,165,0,0.25);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.api-banner .icon { font-size: 18px; }
+.api-banner .msg { flex: 1; font-size: 13px; color: var(--text2); }
+.api-banner input {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px; color: var(--text);
+  font-size: 13px; font-family: monospace;
+  width: 320px; max-width: 100%;
+  outline: none;
+}
+.api-banner input:focus { border-color: var(--gold); }
+.api-banner .btn-sm {
+  padding: 8px 16px; background: var(--gold); color: #000;
+  border: none; border-radius: var(--radius-sm); cursor: pointer;
+  font-size: 13px; font-weight: 600;
+}
+
+/* ─── SKUPAJ ─── */
+.page-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+}
+.page-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 42px; letter-spacing: 0.03em; line-height: 1;
+}
+.page-title small {
+  display: block; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; color: var(--text2); font-weight: 500;
+  letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px;
+}
+
+.toggle-group {
+  display: flex; background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm); overflow: hidden;
+}
+.toggle-btn {
+  padding: 8px 18px; border: none; background: none;
+  color: var(--text2); font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: var(--transition);
+}
+.toggle-btn.active { background: var(--gold); color: #000; }
+
+.skupaj-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 900px) { .skupaj-grid { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.card-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px; letter-spacing: 0.05em;
+  color: var(--text2); margin-bottom: 20px;
+}
+
+/* Ranking list */
+.rank-list { display: flex; flex-direction: column; gap: 6px; }
+
+.rank-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  cursor: pointer;
+}
+.rank-item:hover { background: var(--card2); }
+
+.rank-pos {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px; color: var(--text3); width: 24px; text-align: center;
+  flex-shrink: 0;
+}
+.rank-pos.top { color: var(--gold); }
+
+.rank-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.rank-name { flex: 1; font-size: 14px; font-weight: 500; }
+.rank-liga { font-size: 11px; color: var(--text3); font-weight: 500; }
+
+.rank-bar-wrap { flex: 1; max-width: 120px; }
+.rank-bar-bg { height: 4px; background: var(--bg2); border-radius: 2px; overflow: hidden; }
+.rank-bar-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+
+.rank-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px; width: 52px; text-align: right;
+  flex-shrink: 0;
+}
+
+/* Stats cards */
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+@media (max-width: 600px) { .stats-row { grid-template-columns: 1fr 1fr; } }
+
+.stat-card {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+.stat-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px; letter-spacing: 0.02em;
+  color: var(--gold);
+}
+.stat-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+/* ─── LEAGUE TABLE ─── */
+.league-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+}
+
+.league-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 4px 14px;
+  border-radius: 100px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed;
+}
+
+table thead { position: sticky; top: 0; z-index: 10; }
+
+th {
+  background: var(--bg2);
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+  color: var(--text3); text-transform: uppercase;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+th:first-child {
+  text-align: left; padding-left: 16px;
+  width: 180px; min-width: 160px;
+  position: sticky; left: 0; z-index: 11;
+  background: var(--bg2);
+}
+th.playoff-header { background: rgba(240,165,0,0.08); color: var(--gold); }
+th.obstanek-header { background: rgba(239,68,68,0.08); color: #fc8080; }
+
+td {
+  padding: 8px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  font-size: 13px;
+}
+td:first-child {
+  text-align: left; padding-left: 16px;
+  position: sticky; left: 0; z-index: 1;
+  background: var(--card);
+  font-weight: 500;
+  cursor: pointer;
+}
+td:first-child:hover { color: var(--gold); }
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+tr:hover td:first-child { background: var(--card2); }
+
+/* AVG row */
+tr.avg-row td {
+  background: var(--bg2) !important;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 15px; letter-spacing: 0.03em;
+  color: var(--text2);
+  border-top: 2px solid var(--border2);
+}
+tr.avg-row td:first-child {
+  color: var(--text3);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+/* Attendance cell */
+.att-cell {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 28px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 12px;
+}
+.att-cell.has-data { background: rgba(240,165,0,0.12); color: var(--gold); }
+.att-cell.no-data { background: rgba(239,68,68,0.08); color: rgba(239,68,68,0.4); font-size: 16px; }
+.att-cell.empty { color: var(--text3); }
+
+/* ─── TEAM MODAL ─── */
+#team-modal {
+  position: fixed; inset: 0; z-index: 500;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  padding: 20px;
+}
+#team-modal.open { display: flex; }
+
+.team-modal-box {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 32px;
+  width: 100%; max-width: 760px;
+  max-height: 90vh; overflow-y: auto;
+  animation: fadeUp 0.2s ease both;
+}
+
+.team-modal-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 24px;
+}
+.team-modal-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px; letter-spacing: 0.03em;
+}
+.close-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%; background: var(--card2);
+  border: 1px solid var(--border); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text2); font-size: 18px;
+  transition: var(--transition); flex-shrink: 0;
+}
+.close-btn:hover { border-color: var(--red); color: var(--red); }
+
+.team-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+@media (max-width: 500px) { .team-stats { grid-template-columns: 1fr 1fr; } }
+
+.chart-container { position: relative; height: 240px; }
+
+/* ─── ADMIN ─── */
+.admin-section { margin-bottom: 32px; }
+.admin-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px; letter-spacing: 0.05em;
+  margin-bottom: 16px;
+}
+
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.form-group label { display: block; font-size: 11px; color: var(--text2); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.form-group select, .form-group input[type=number] {
+  width: 100%; background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px;
+  outline: none; transition: var(--transition);
+}
+.form-group select:focus, .form-group input:focus { border-color: var(--gold); }
+.form-group select option { background: var(--card); }
+
+.admin-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--card);
+  margin-top: 16px;
+}
+
+.admin-input {
+  width: 64px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 4px 6px;
+  color: var(--text); font-size: 12px; text-align: center;
+  font-family: 'DM Sans', sans-serif;
+  outline: none; transition: var(--transition);
+}
+.admin-input:hover { border-color: var(--border2); }
+.admin-input:focus { border-color: var(--gold); background: var(--bg2); }
+.admin-input.has-val { color: var(--gold); font-weight: 600; }
+
+.save-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 0; flex-wrap: wrap;
+}
+.save-status { font-size: 13px; color: var(--text2); }
+.save-status.ok { color: var(--green); }
+.save-status.err { color: var(--red); }
+
+/* ─── LOADING ─── */
+.loading {
+  display: flex; align-items: center; justify-content: center;
+  height: 200px; color: var(--text2); font-size: 14px; gap: 10px;
+}
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* ─── CHARTS VIEW ─── */
+.charts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; }
+@media (max-width: 500px) { .charts-grid { grid-template-columns: 1fr; } }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 640px) {
+  .topnav { padding: 0 16px; }
+  .nav-brand { font-size: 18px; margin-right: 16px; }
+  .nav-tab { padding: 16px 14px; font-size: 12px; }
+  .view { padding: 20px 16px; }
+  .page-title { font-size: 32px; }
+}
+
+/* ─── LIGA COLOR CLASSES ─── */
+.liga-1 { background: var(--blue-dim); color: var(--blue); border-color: rgba(59,130,246,0.3); }
+.liga-2 { background: var(--green-dim); color: var(--green); border-color: rgba(16,185,129,0.3); }
+.liga-3 { background: var(--amber-dim); color: var(--amber); border-color: rgba(245,158,11,0.3); }
+
+.dot-liga-1 { background: var(--blue); }
+.dot-liga-2 { background: var(--green); }
+.dot-liga-3 { background: var(--amber); }
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="login-screen">
+  <div class="login-bg"></div>
+  <div class="login-grid"></div>
+  <div class="login-box">
+    <div class="login-badge">🏀 Sezona 2024/25</div>
+    <div class="login-title">Obiski<br><span>Tekem</span></div>
+    <div class="login-sub">Slovenska košarka — 1., 2. in 3. liga</div>
+    <div class="login-cards">
+      <div class="login-card" onclick="loginGuest()">
+        <div class="icon">👁️</div>
+        <div class="label">Vstopi kot</div>
+        <div class="title">Gost</div>
+      </div>
+      <div class="login-card" onclick="openPwdModal()">
+        <div class="icon">🔐</div>
+        <div class="label">Vstopi kot</div>
+        <div class="title">Admin</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Password modal -->
+<div id="pwd-modal">
+  <div class="modal-box">
+    <div class="modal-title">Adminstratorski dostop</div>
+    <div class="input-row">
+      <label>Geslo</label>
+      <input type="password" id="pwd-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkPwd()">
+    </div>
+    <div class="modal-error" id="pwd-error">Napačno geslo. Poskusi znova.</div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closePwdModal()">Prekliči</button>
+      <button class="btn btn-primary" onclick="checkPwd()">Vstopi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MAIN APP ══════════ -->
+<div id="app">
+
+  <!-- TOP NAV -->
+  <nav class="topnav">
+    <div class="nav-brand">Obiski <span>Tekem</span></div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-view="skupaj">Skupaj</button>
+      <button class="nav-tab" data-view="liga1">1. Liga</button>
+      <button class="nav-tab" data-view="liga2">2. Liga</button>
+      <button class="nav-tab" data-view="liga3">3. Liga</button>
+      <button class="nav-tab admin-only" data-view="admin" style="display:none">Admin</button>
+    </div>
+    <div class="nav-right">
+      <div class="admin-badge admin-only" style="display:none" id="admin-badge">⚙️ Admin</div>
+      <button class="logout-btn" onclick="fetchAndRefresh()" title="Osveži podatke iz Google Sheets" style="border-color:var(--gold);color:var(--gold)">⟳ Osveži</button>
+      <button class="logout-btn" onclick="logout()">Izhod</button>
+    </div>
+  </nav>
+
+  <!-- ── SKUPAJ VIEW ── -->
+  <div class="view active" id="view-skupaj">
+    <div id="api-banner" class="api-banner" style="display:none">
+      <span class="icon">⚡</span>
+      <span class="msg">Za živé podatke iz Google Sheets vnesi API ključ:</span>
+      <input type="text" id="api-key-input" placeholder="AIzaSy..." />
+      <button class="btn-sm" onclick="saveApiKey()">Shrani & osveži</button>
+    </div>
+
+    <div class="page-header">
+      <div class="page-title">
+        <small>Sezona 2024/25</small>
+        Lestvica obiska
+      </div>
+      <div class="toggle-group">
+        <button class="toggle-btn active" id="toggle-avg" onclick="setSkupajMode('avg')">Povprečje</button>
+        <button class="toggle-btn" id="toggle-total" onclick="setSkupajMode('total')">Skupaj</button>
+      </div>
+    </div>
+
+    <div class="stats-row" id="global-stats"></div>
+
+    <div class="skupaj-grid">
+      <div class="card">
+        <div class="card-title">Vse ekipe — po obisku</div>
+        <div class="rank-list" id="rank-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Primerjava lig</div>
+        <div class="chart-container">
+          <canvas id="liga-compare-chart"></canvas>
+        </div>
+        <div style="height:16px"></div>
+        <div class="card-title">Top 10 — graf</div>
+        <div class="chart-container">
+          <canvas id="top10-chart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 1. LIGA VIEW ── -->
+  <div class="view" id="view-liga1">
+    <div class="league-header">
+      <div class="page-title">
+        <small>Slovenska košarkarska liga</small>
+        1. Liga
+      </div>
+      <span class="league-badge liga-1">● 1. Liga</span>
+    </div>
+    <div id="liga1-stats" class="stats-row"></div>
+    <div class="table-wrap" id="liga1-table"></div>
+  </div>
+
+  <!-- ── 2. LIGA VIEW ── -->
+  <div class="view" id="view-liga2">
+    <div class="league-header">
+      <div class="page-title">
+        <small>Slovenska košarkarska 2. liga</small>
+        2. Liga
+      </div>
+      <span class="league-badge liga-2">● 2. Liga</span>
+    </div>
+    <div id="liga2-stats" class="stats-row"></div>
+    <div class="table-wrap" id="liga2-table"></div>
+  </div>
+
+  <!-- ── 3. LIGA VIEW ── -->
+  <div class="view" id="view-liga3">
+    <div class="league-header">
+      <div class="page-title">
+        <small>Slovenska košarkarska 3. liga</small>
+        3. Liga
+      </div>
+      <span class="league-badge liga-3">● 3. Liga</span>
+    </div>
+    <div id="liga3-stats" class="stats-row"></div>
+    <div class="table-wrap" id="liga3-table"></div>
+  </div>
+
+  <!-- ── ADMIN VIEW ── -->
+  <div class="view" id="view-admin">
+    <div class="page-header">
+      <div class="page-title">
+        <small>Administrator</small>
+        Vnos podatkov
+      </div>
+    </div>
+
+    <div class="card admin-section">
+      <div class="admin-title">Google Sheets API</div>
+      <div class="form-grid">
+        <div class="form-group" style="grid-column: 1/-1">
+          <label>API Ključ (Google Sheets)</label>
+          <input type="text" id="admin-api-key" placeholder="AIzaSy..." style="width:100%; background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:10px 14px; color:var(--text); font-size:14px; outline:none; font-family:monospace;">
+        </div>
+      </div>
+      <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="adminSaveApiKey()">Shrani ključ & osveži podatke</button>
+        <span id="api-status" class="save-status"></span>
+      </div>
+    </div>
+
+    <div class="card admin-section">
+      <div class="admin-title">Vnos gledalcev</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Liga</label>
+          <select id="admin-liga" onchange="renderAdminTable()">
+            <option value="1. liga">1. Liga</option>
+            <option value="2. liga">2. Liga</option>
+            <option value="3. liga">3. Liga</option>
+          </select>
+        </div>
+      </div>
+      <div class="admin-table-wrap" id="admin-table"></div>
+      <div class="save-bar">
+        <button class="btn btn-primary" onclick="saveAdminData()">💾 Shrani v Google Sheets</button>
+        <span id="save-status" class="save-status"></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════ TEAM MODAL ══════════ -->
+<div id="team-modal">
+  <div class="team-modal-box">
+    <div class="team-modal-header">
+      <div>
+        <div style="font-size:12px; color:var(--text2); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px" id="modal-liga-label"></div>
+        <div class="team-modal-name" id="modal-team-name"></div>
+      </div>
+      <button class="close-btn" onclick="closeTeamModal()">✕</button>
+    </div>
+    <div class="team-stats" id="modal-stats"></div>
+    <div style="font-size:12px; color:var(--text2); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px">Obisk po kolih</div>
+    <div class="chart-container">
+      <canvas id="team-chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════ CONFIG ══════════
+const CONFIG = {
+  SPREADSHEET_ID: '1xkD-hYxZo8DrRGJtmgom9F_Zz3VSEXaDWbQdZu99Ez0',
+  API_KEY: localStorage.getItem('obiski_api_key') || 'AIzaSyDaHIlfC6BovfnZAxKqdJzjjfyESCeaI4w',
+  ADMIN_PASSWORD: 'kosarka2025',
+  APPS_SCRIPT_URL: '' // Dodamo kasneje
+};
+
+// ══════════ DATA ══════════
+const LEAGUE_DATA = {
+  '1. liga': {
+    color: '#3b82f6', colorDim: 'rgba(59,130,246,0.12)', ligaClass: 'liga-1', dotClass: 'dot-liga-1',
+    rounds: Array.from({length:27}, (_,i) => `${i+1}. kolo`),
+    teams: [
+      { name:'Ece Triglav Kranj',     data:[null,350,null,272,null,350,null,null,220,160,null,500,null,217,null,300,220,null,150,300,null,380,null,null,null,null,null] },
+      { name:'GGD Šenčur',            data:[100,null,300,65,300,null,220,116,null,null,100,null,null,null,300,null,null,80,60,null,100,null,60,100,null,null,null] },
+      { name:'Hopsi Polzela',          data:[null,310,null,null,340,null,150,null,300,200,null,200,300,null,200,null,190,null,null,600,null,300,null,null,325,null,null] },
+      { name:'Ilirija',               data:[100,null,220,null,116,150,null,null,null,null,100,null,200,null,null,100,97,100,90,null,50,null,150,100,null,null,null] },
+      { name:'Kansai Helios Domžale', data:[400,150,300,400,null,250,null,200,null,null,null,null,null,300,null,150,null,200,100,null,200,null,150,null,150,null,null] },
+      { name:'Krka',                  data:[null,null,null,null,null,null,null,80,null,90,70,100,70,200,100,120,null,100,100,null,100,117,null,null,70,null,null] },
+      { name:'Laško',                 data:[150,100,null,150,null,400,null,250,null,null,null,100,null,300,null,100,null,150,null,100,null,100,null,null,null,null,null] },
+      { name:'Rogaška',               data:[null,null,300,null,250,150,270,150,150,250,200,null,200,null,null,null,null,null,null,300,null,null,200,170,null,null,null] },
+      { name:'Terme Olimia Podčetrtek',data:[null,150,null,200,null,null,100,null,150,150,null,250,null,250,200,null,100,null,null,50,null,100,null,100,null,null,null] },
+      { name:'Šentjur',               data:[437,null,250,null,100,null,100,null,180,null,200,null,320,null,600,null,200,null,null,null,250,null,200,100,null,null,null] },
+    ]
+  },
+  '2. liga': {
+    color: '#10b981', colorDim: 'rgba(16,185,129,0.12)', ligaClass: 'liga-2', dotClass: 'dot-liga-2',
+    rounds: [
+      ...Array.from({length:22}, (_,i) => `${i+1}. kolo`),
+      'Četrtfinale (1.)','Liga za obst. 1.','Četrtfinale (2.)','Liga za obst. 2.',
+      'Četrtfinale (3.)','Liga za obst. 3.','Polfinale (1.)','Liga za obst. 4.',
+      'Polfinale (2.)','Liga za obst. 5.','Finale (1.)','Liga za obst. 6.','Finale (2.)'
+    ],
+    // Playoff columns start at index 22
+    playoffStart: 22,
+    playoffCols: [0,2,4,6,8,10,12], // even = playoff
+    obstanekCols: [1,3,5,7,9,11],   // odd = liga za obstanek
+    teams: [
+      { name:'Celje',                      data:[null,100,null,50,null,null,100,null,150,null,80,50,null,60,null,50,50,null,70,null,100,null, null,null,500,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Gorica',                     data:[250,null,200,null,250,null,200,null,150,300,null,null,230,null,150,null,300,null,150,null,null,150, 300,null,null,null,null,null,500,null,null,null,null,null,null] },
+      { name:'Hidria',                     data:[null,null,null,null,250,null,302,null,303,null,450,500,400,700,600,null,600,null,600,null,400,null, null,null,null,250,null,null,null,350,null,null,null,300,null] },
+      { name:'Ipros Vrhnika',              data:[350,null,310,null,200,null,300,null,100,null,100,null,100,null,230,null,200,null,153,null,150,null, 200,null,null,null,300,null,null,null,150,null,null,null,null] },
+      { name:'Ježica',                     data:[null,70,null,100,null,150,null,50,null,null,100,70,null,100,null,100,null,100,null,60,70,null, null,null,null,null,null,70,null,100,null,67,null,null,null] },
+      { name:'LTH Castings',              data:[200,150,null,200,null,120,null,100,null,150,null,null,null,100,null,132,null,120,null,150,null,60, 300,null,null,null,null,null,null,null,550,null,null,null,null] },
+      { name:'Ljubljana',                  data:[null,123,null,100,null,60,null,70,null,100,null,100,null,100,null,50,null,40,null,47,null,70, null,100,null,null,null,null,null,null,null,100,null,100,null] },
+      { name:'Plama Pur Ilirska Bistrica', data:[622,null,620,755,null,811,null,820,null,450,null,null,520,null,null,400,null,400,null,620,null,1000, 650,null,null,null,650,null,800,null,null,null,1300,null,null] },
+      { name:'Portorož',                   data:[100,null,120,null,64,null,100,100,null,150,null,null,200,null,160,null,120,null,null,300,null,140, null,null,300,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Postojna',                   data:[null,150,null,170,null,180,null,null,100,null,850,200,null,200,null,250,null,150,200,null,100,null, null,200,null,150,null,150,null,null,null,null,null,null,null] },
+      { name:'Slovan',                     data:[null,200,120,null,110,null,100,null,250,null,130,150,null,null,150,null,130,null,120,null,110,null, null,null,200,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Voga Grosuplje',             data:[450,null,287,null,250,200,null,500,null,500,null,null,200,null,500,null,null,250,null,600,null,400, null,null,600,null,null,null,null,null,null,null,null,null,null] },
+    ]
+  },
+  '3. liga': {
+    color: '#f59e0b', colorDim: 'rgba(245,158,11,0.12)', ligaClass: 'liga-3', dotClass: 'dot-liga-3',
+    rounds: Array.from({length:18}, (_,i) => `${i+1}. kolo`),
+    teams: [
+      { name:'Armicafe Troti',            data:[null,null,null,80,null,null,50,null,60,60,30,90,null,50,120,null,30,null] },
+      { name:'Bistrica Kety Emmi',        data:[null,null,150,null,100,null,150,null,60,100,130,null,50,null,200,null,100,null] },
+      { name:'Branik Maribor',            data:[100,100,null,null,70,null,150,null,90,null,null,80,120,null,200,null,50,null] },
+      { name:'Cedevita Olimpija Mladi',   data:[null,null,null,40,null,60,null,22,null,30,20,50,null,50,null,20,null,60] },
+      { name:'Elektra Šoštanj',           data:[150,null,100,null,null,120,null,200,null,null,98,null,100,90,null,80,null,100] },
+      { name:'Gorenja vas',               data:[120,null,80,null,130,120,null,80,null,null,150,null,130,null,null,100,null,120] },
+      { name:'Hrastnik',                  data:[null,50,null,80,80,211,null,80,null,80,null,60,null,null,null,55,null,70] },
+      { name:'Innoduler Dravograd',       data:[159,null,150,null,150,null,157,null,100,null,150,null,80,null,100,null,80,null] },
+      { name:'Janče ECP Tactical',        data:[null,50,null,null,39,null,40,null,40,30,null,70,100,null,50,null,80,null] },
+      { name:'Kolpa',                     data:[60,99,60,null,50,null,60,60,null,null,null,null,60,null,50,null,null,80] },
+      { name:'Konjice',                   data:[120,200,null,100,null,100,null,80,60,null,null,90,null,50,null,200,null,null] },
+      { name:'Koper',                     data:[80,null,70,null,140,null,100,null,80,null,200,null,80,null,200,null,150,null] },
+      { name:'Kovinarstvo Bučar Miklavž', data:[null,80,null,120,null,150,null,null,null,50,null,80,null,70,null,50,40,80] },
+      { name:'Leone Ajdovščina',          data:[100,null,100,103,null,200,null,100,null,null,200,null,null,130,null,100,null,120] },
+      { name:'Litija',                    data:[null,120,118,null,70,null,110,null,50,59,null,null,70,null,100,null,100,null] },
+      { name:'Mesarija Prunk Sežana',     data:[300,300,null,100,null,120,null,120,null,null,null,70,null,250,null,70,null,100] },
+      { name:'Nazarje',                   data:[null,120,null,90,null,null,70,null,50,100,null,50,null,55,80,null,40,null] },
+      { name:'Tera Tolmin',               data:[null,80,null,80,null,70,null,null,70,100,null,100,null,100,null,70,70,null] },
+      { name:'Vojnik G7',                 data:[60,null,50,80,null,50,null,50,null,null,50,null,null,60,null,100,null,70] },
+      { name:'Vrani Vransko',             data:[null,null,100,null,80,null,70,100,null,100,70,null,100,null,100,null,null,100] },
+    ]
+  }
+};
+
+// ══════════ HELPERS ══════════
+function teamStats(data) {
+  const vals = data.filter(v => v !== null && v !== undefined);
+  const total = vals.reduce((a,b) => a+b, 0);
+  const avg = vals.length ? Math.round(total/vals.length) : 0;
+  const max = vals.length ? Math.max(...vals) : 0;
+  const min = vals.length ? Math.min(...vals) : 0;
+  return { total, avg, max, min, count: vals.length };
+}
+
+function liStyle(ld) {
+  return `background:${ld.colorDim}; color:${ld.color}; border:1px solid ${ld.color}33;`;
+}
+
+function fmtNum(n) { return n.toLocaleString('sl-SI'); }
+
+// Compute all teams ranked
+function buildRanking(mode='avg') {
+  const all = [];
+  Object.entries(LEAGUE_DATA).forEach(([lgName, lg]) => {
+    lg.teams.forEach(t => {
+      const s = teamStats(t.data);
+      all.push({ name: t.name, liga: lgName, avg: s.avg, total: s.total, count: s.count, lg });
+    });
+  });
+  all.sort((a,b) => (mode==='avg' ? b.avg-a.avg : b.total-a.total));
+  return all;
+}
+
+// ══════════ AUTH ══════════
+let isAdmin = false;
+let skupajMode = 'avg';
+let teamChart = null;
+let ligaCompareChart = null;
+let top10Chart = null;
+
+function loginGuest() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  showApiBannerIfNeeded();
+  renderAll();
+  fetchAndRefresh(); // Takoj naloži sveže podatke
+}
+
+function openPwdModal() {
+  document.getElementById('pwd-modal').classList.add('open');
+  document.getElementById('pwd-input').focus();
+}
+function closePwdModal() {
+  document.getElementById('pwd-modal').classList.remove('open');
+  document.getElementById('pwd-input').value = '';
+  document.getElementById('pwd-error').classList.remove('show');
+}
+function checkPwd() {
+  const pwd = document.getElementById('pwd-input').value;
+  if (pwd === CONFIG.ADMIN_PASSWORD) {
+    isAdmin = true;
+    closePwdModal();
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').classList.add('visible');
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
+    document.getElementById('admin-api-key').value = CONFIG.API_KEY;
+    showApiBannerIfNeeded();
+    renderAll();
+    fetchAndRefresh(); // Takoj naloži sveže podatke
+  } else {
+    document.getElementById('pwd-error').classList.add('show');
+    document.getElementById('pwd-input').value = '';
+    document.getElementById('pwd-input').focus();
+  }
+}
+function logout() {
+  isAdmin = false;
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('login-screen').style.display = 'flex';
+  switchTab('skupaj');
+}
+
+function showApiBannerIfNeeded() {
+  const banner = document.getElementById('api-banner');
+  if (!CONFIG.API_KEY) {
+    banner.style.display = 'flex';
+    document.getElementById('api-key-input').value = '';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+// ══════════ NAV ══════════
+function switchTab(view) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelector(`[data-view="${view}"]`).classList.add('active');
+  document.getElementById(`view-${view.replace('liga','liga')}`).classList.add('active');
+}
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.dataset.view));
+});
+
+// ══════════ SKUPAJ ══════════
+function setSkupajMode(mode) {
+  skupajMode = mode;
+  document.getElementById('toggle-avg').classList.toggle('active', mode==='avg');
+  document.getElementById('toggle-total').classList.toggle('active', mode==='total');
+  renderSkupaj();
+}
+
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  CONFIG.API_KEY = key;
+  localStorage.setItem('obiski_api_key', key);
+  showApiBannerIfNeeded();
+  fetchAndRefresh();
+}
+function adminSaveApiKey() {
+  const key = document.getElementById('admin-api-key').value.trim();
+  CONFIG.API_KEY = key;
+  localStorage.setItem('obiski_api_key', key);
+  document.getElementById('api-key-input').value = key;
+  showApiBannerIfNeeded();
+  fetchAndRefresh();
+}
+
+function renderSkupaj() {
+  const ranking = buildRanking(skupajMode);
+  const maxVal = ranking[0] ? (skupajMode==='avg' ? ranking[0].avg : ranking[0].total) : 1;
+
+  // Global stats
+  const allAvgs = ranking.map(r => r.avg);
+  const allTotals = ranking.map(r => r.total);
+  const globalAvg = Math.round(allAvgs.reduce((a,b)=>a+b,0)/allAvgs.length);
+  const globalTotal = allTotals.reduce((a,b)=>a+b,0);
+  const maxTeam = ranking[0];
+
+  document.getElementById('global-stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-val">${fmtNum(globalAvg)}</div>
+      <div class="stat-label">Povp. obisk / tekma</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">${fmtNum(globalTotal)}</div>
+      <div class="stat-label">Skupaj gledalcev</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">${maxTeam ? fmtNum(skupajMode==='avg'?maxTeam.avg:maxTeam.total) : '—'}</div>
+      <div class="stat-label">Rekord: ${maxTeam ? maxTeam.name.split(' ').slice(-1)[0] : '—'}</div>
+    </div>
+  `;
+
+  // Rank list
+  const list = document.getElementById('rank-list');
+  list.innerHTML = ranking.map((r,i) => {
+    const val = skupajMode==='avg' ? r.avg : r.total;
+    const pct = Math.round(val/maxVal*100);
+    const lg = LEAGUE_DATA[r.liga];
+    return `<div class="rank-item" onclick="openTeamModal('${r.liga}','${r.name.replace(/'/g,"\\'")}')">
+      <span class="rank-pos ${i<3?'top':''}">${i+1}</span>
+      <span class="rank-dot ${lg.dotClass}"></span>
+      <div style="flex:1; min-width:0">
+        <div class="rank-name">${r.name}</div>
+        <div class="rank-liga">${r.liga}</div>
+      </div>
+      <div class="rank-bar-wrap">
+        <div class="rank-bar-bg">
+          <div class="rank-bar-fill" style="width:${pct}%; background:${lg.color}"></div>
+        </div>
+      </div>
+      <div class="rank-val" style="color:${lg.color}">${fmtNum(val)}</div>
+    </div>`;
+  }).join('');
+
+  renderLigaCompareChart();
+  renderTop10Chart(ranking.slice(0,10));
+}
+
+function renderLigaCompareChart() {
+  const ctx = document.getElementById('liga-compare-chart').getContext('2d');
+  if (ligaCompareChart) ligaCompareChart.destroy();
+
+  const labels = Object.keys(LEAGUE_DATA);
+  const avgs = labels.map(lg => {
+    const teams = LEAGUE_DATA[lg].teams;
+    const allAvgs = teams.map(t => teamStats(t.data).avg);
+    return Math.round(allAvgs.reduce((a,b)=>a+b,0)/allAvgs.length);
+  });
+  const colors = labels.map(lg => LEAGUE_DATA[lg].color);
+
+  ligaCompareChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: avgs,
+        backgroundColor: colors.map(c => c+'33'),
+        borderColor: colors,
+        borderWidth: 2,
+        borderRadius: 6,
+      }]
+    },
+    options: chartOptions('Povprečni obisk na tekmo po ligi', false)
+  });
+}
+
+function renderTop10Chart(top10) {
+  const ctx = document.getElementById('top10-chart').getContext('2d');
+  if (top10Chart) top10Chart.destroy();
+
+  top10Chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: top10.map(t => t.name.split(' ').slice(-1)[0]),
+      datasets: [{
+        data: top10.map(t => skupajMode==='avg' ? t.avg : t.total),
+        backgroundColor: top10.map(t => LEAGUE_DATA[t.liga].color+'44'),
+        borderColor: top10.map(t => LEAGUE_DATA[t.liga].color),
+        borderWidth: 2,
+        borderRadius: 4,
+      }]
+    },
+    options: chartOptions('', false)
+  });
+}
+
+function chartOptions(title, showLegend=true) {
+  return {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: showLegend },
+      title: { display: !!title, text: title, color: '#8899b0', font: { size: 12 } },
+      tooltip: {
+        backgroundColor: '#1a2235',
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
+        titleColor: '#e8edf5',
+        bodyColor: '#8899b0',
+        callbacks: {
+          label: ctx => ` ${fmtNum(ctx.parsed.y)} gledalcev`
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: '#4a5a70', font: { size: 11 } },
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        border: { color: 'rgba(255,255,255,0.08)' }
+      },
+      y: {
+        ticks: { color: '#4a5a70', font: { size: 11 }, callback: v => fmtNum(v) },
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        border: { color: 'rgba(255,255,255,0.08)' }
+      }
+    }
+  };
+}
+
+// ══════════ LEAGUE TABLES ══════════
+function renderLeagueTable(lgName, containerId, statsId) {
+  const lg = LEAGUE_DATA[lgName];
+  const container = document.getElementById(containerId);
+  const statsEl = document.getElementById(statsId);
+
+  // Stats bar
+  const allStats = lg.teams.map(t => teamStats(t.data));
+  const avgOfAvgs = Math.round(allStats.reduce((a,s)=>a+s.avg,0)/allStats.length);
+  const totalAll = allStats.reduce((a,s)=>a+s.total,0);
+  const maxEntry = allStats.reduce((best,s,i) => s.avg>best.val?{val:s.avg,name:lg.teams[i].name}:best, {val:0,name:''});
+
+  statsEl.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-val" style="color:${lg.color}">${fmtNum(avgOfAvgs)}</div>
+      <div class="stat-label">Povp. obisk / tekma</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:${lg.color}">${fmtNum(totalAll)}</div>
+      <div class="stat-label">Skupaj gledalcev</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:${lg.color}">${fmtNum(maxEntry.val)}</div>
+      <div class="stat-label">Rekord avg: ${maxEntry.name.split(' ').slice(-1)[0]}</div>
+    </div>
+  `;
+
+  // Column averages per round
+  const roundAvgs = lg.rounds.map((_, ri) => {
+    const vals = lg.teams.map(t => t.data[ri]).filter(v => v !== null && v !== undefined);
+    return vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length) : null;
+  });
+
+  const maxRoundAvg = Math.max(...roundAvgs.filter(v => v!==null));
+
+  // Build header
+  let thead = `<thead><tr><th>Ekipa</th>`;
+  lg.rounds.forEach((r, ri) => {
+    const isPlayoff = lg.playoffStart !== undefined && ri >= lg.playoffStart;
+    const relIdx = ri - (lg.playoffStart||0);
+    let cls = '';
+    if (isPlayoff) {
+      if (lg.playoffCols && lg.playoffCols.includes(relIdx)) cls = 'playoff-header';
+      else if (lg.obstanekCols && lg.obstanekCols.includes(relIdx)) cls = 'obstanek-header';
+    }
+    thead += `<th class="${cls}" style="min-width:52px">${r}</th>`;
+  });
+  thead += `</tr></thead>`;
+
+  // Build rows
+  let tbody = `<tbody>`;
+  lg.teams.forEach(t => {
+    const s = teamStats(t.data);
+    tbody += `<tr>
+      <td onclick="openTeamModal('${lgName}','${t.name.replace(/'/g,"\\'")}')">
+        <div style="font-size:13px">${t.name}</div>
+        <div style="font-size:11px;color:var(--text3)">${fmtNum(s.avg)} avg · ${fmtNum(s.total)} skupaj</div>
+      </td>`;
+    t.data.forEach(v => {
+      if (v !== null && v !== undefined) {
+        tbody += `<td><span class="att-cell has-data">${v}</span></td>`;
+      } else {
+        tbody += `<td><span class="att-cell no-data">—</span></td>`;
+      }
+    });
+    tbody += `</tr>`;
+  });
+
+  // AVG row
+  tbody += `<tr class="avg-row"><td>Povprečje / kolo</td>`;
+  roundAvgs.forEach(avg => {
+    if (avg !== null) {
+      const intensity = Math.round((avg/maxRoundAvg)*100);
+      tbody += `<td style="color:${lg.color};opacity:${0.4+intensity*0.006}">${avg}</td>`;
+    } else {
+      tbody += `<td style="color:var(--text3)">—</td>`;
+    }
+  });
+  tbody += `</tr></tbody>`;
+
+  container.innerHTML = `<table>${thead}${tbody}</table>`;
+}
+
+// ══════════ TEAM MODAL ══════════
+function openTeamModal(lgName, teamName) {
+  const lg = LEAGUE_DATA[lgName];
+  const team = lg.teams.find(t => t.name === teamName);
+  if (!team) return;
+
+  const s = teamStats(team.data);
+  const maxIdx = team.data.indexOf(Math.max(...team.data.filter(v=>v!==null)));
+  const minIdx = team.data.findIndex(v=>v === Math.min(...team.data.filter(v=>v!==null)));
+
+  document.getElementById('modal-liga-label').innerHTML = `<span style="color:${lg.color}">${lgName}</span>`;
+  document.getElementById('modal-team-name').textContent = teamName;
+  document.getElementById('modal-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-val" style="color:${lg.color}">${fmtNum(s.avg)}</div><div class="stat-label">Povprečje</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:${lg.color}">${fmtNum(s.total)}</div><div class="stat-label">Skupaj</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:${lg.color}">${fmtNum(s.max)}</div><div class="stat-label">Rekord (${lg.rounds[maxIdx]})</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:${lg.color}">${fmtNum(s.min)}</div><div class="stat-label">Minimum</div></div>
+  `;
+
+  // Chart
+  const ctx = document.getElementById('team-chart').getContext('2d');
+  if (teamChart) teamChart.destroy();
+
+  const chartData = team.data.map((v,i) => v !== null ? {x: lg.rounds[i], y: v} : null).filter(Boolean);
+  const avgLine = Array(chartData.length).fill(s.avg);
+
+  teamChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: chartData.map(d => d.x),
+      datasets: [
+        {
+          label: 'Obisk',
+          data: chartData.map(d => d.y),
+          borderColor: lg.color,
+          backgroundColor: lg.color+'22',
+          borderWidth: 2.5,
+          pointBackgroundColor: lg.color,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          tension: 0.3,
+        },
+        {
+          label: 'Povprečje',
+          data: avgLine,
+          borderColor: 'rgba(255,255,255,0.2)',
+          borderWidth: 1.5,
+          borderDash: [5,4],
+          pointRadius: 0,
+          fill: false,
+        }
+      ]
+    },
+    options: {
+      ...chartOptions(''),
+      plugins: {
+        ...chartOptions('').plugins,
+        legend: { display: true, labels: { color: '#8899b0', font: { size: 11 } } }
+      }
+    }
+  });
+
+  document.getElementById('team-modal').classList.add('open');
+}
+
+function closeTeamModal() {
+  document.getElementById('team-modal').classList.remove('open');
+  if (teamChart) { teamChart.destroy(); teamChart = null; }
+}
+document.getElementById('team-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('team-modal')) closeTeamModal();
+});
+
+// ══════════ ADMIN TABLE ══════════
+function renderAdminTable() {
+  const lgName = document.getElementById('admin-liga').value;
+  const lg = LEAGUE_DATA[lgName];
+  const wrap = document.getElementById('admin-table');
+
+  let html = `<table>
+    <thead><tr><th>Ekipa</th>`;
+  lg.rounds.forEach(r => html += `<th>${r}</th>`);
+  html += `</tr></thead><tbody>`;
+
+  lg.teams.forEach((t, ti) => {
+    html += `<tr><td>${t.name}</td>`;
+    t.data.forEach((v, ri) => {
+      const val = v !== null ? v : '';
+      html += `<td><input type="number" class="admin-input ${val!==''?'has-val':''}"
+        value="${val}" min="0"
+        data-liga="${lgName}" data-team="${ti}" data-round="${ri}"
+        onchange="updateData(this)"
+        oninput="this.classList.toggle('has-val', this.value!=='')"></td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table>`;
+  wrap.innerHTML = html;
+}
+
+function updateData(input) {
+  const lgName = input.dataset.liga;
+  const ti = parseInt(input.dataset.team);
+  const ri = parseInt(input.dataset.round);
+  const val = input.value === '' ? null : parseInt(input.value);
+  LEAGUE_DATA[lgName].teams[ti].data[ri] = val;
+  // Re-render tables if visible
+  renderLeagueTable(lgName, `liga${lgName[0]}-table`, `liga${lgName[0]}-stats`);
+  renderSkupaj();
+}
+
+async function saveAdminData() {
+  const status = document.getElementById('save-status');
+  if (!CONFIG.APPS_SCRIPT_URL) {
+    status.textContent = '⚠️ Apps Script URL ni nastavljen (kmalu!)';
+    status.className = 'save-status err';
+    return;
+  }
+  status.textContent = 'Shranjujem...';
+  status.className = 'save-status';
+  try {
+    const lgName = document.getElementById('admin-liga').value;
+    const lg = LEAGUE_DATA[lgName];
+    const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ liga: lgName, teams: lg.teams })
+    });
+    if (response.ok) {
+      status.textContent = '✓ Shranjeno v Google Sheets!';
+      status.className = 'save-status ok';
+    } else throw new Error();
+  } catch {
+    status.textContent = '✗ Napaka pri shranjevanju';
+    status.className = 'save-status err';
+  }
+}
+
+// ══════════ GOOGLE SHEETS FETCH ══════════
+async function fetchSheetRange(sheetName, range) {
+  if (!CONFIG.API_KEY) return null;
+  const encodedSheet = encodeURIComponent(sheetName);
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodedSheet}!${range}?key=${CONFIG.API_KEY}`;
+  try {
+    const res = await fetch(url, { mode: "cors" });
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      console.warn(`Sheets API ${res.status} za ${sheetName}:`, errJson?.error?.message || res.statusText);
+      return null;
+    }
+    const json = await res.json();
+    return json.values || [];
+  } catch(e) {
+    console.warn(`Sheets fetch failed for ${sheetName}:`, e.message || e);
+    const statusEl = document.getElementById("api-status");
+    if (statusEl && (e.message||"").toLowerCase().includes("fetch")) {
+      statusEl.innerHTML = "⚠️ Napaka pri dostopu. Preveri: 1) Ali je sheet javen? 2) Ali ima API ključ pravice za Sheets?";
+      statusEl.className = "save-status err";
+    }
+    return null;
+  }
+}
+
+function parseLeagueSheet(values, lgName) {
+  if (!values || values.length < 2) return;
+  const lg = LEAGUE_DATA[lgName];
+
+  // Row 0 = headers: ["Ekipa", "1. kolo", "2. kolo", ...]
+  // Data starts at column index 1 (NO empty spacer column in API response!)
+  // Trailing empty cells are omitted by Sheets API — handle sparse rows
+  const teamRows = values.slice(1).filter(row => {
+    const name = (row[0] || "").trim();
+    if (!name) return false;
+    if (name.toUpperCase().startsWith("AVG")) return false;
+    if (/^\d+$/.test(name)) return false;
+    return true;
+  });
+
+  let updated = 0;
+  teamRows.forEach(row => {
+    const name = (row[0] || "").trim();
+    const team = lg.teams.find(t => t.name === name);
+    if (!team) { console.warn("Ekipa ni najdena v podatkih:", name); return; }
+    // Col A (index 0) = Ekipa, Col B+ (index 1+) = round data
+    team.data = lg.rounds.map((_, ri) => {
+      const cell = (row[ri + 1] || "").toString().trim();
+      if (!cell) return null;
+      const n = parseInt(cell.replace(/[^0-9]/g, ""));
+      return isNaN(n) ? null : n;
+    });
+    updated++;
+  });
+  console.log(`${lgName}: posodobljeno ${updated}/${lg.teams.length} ekip`);
+}
+
+async function fetchAndRefresh() {
+  if (!CONFIG.API_KEY) return;
+  const statusEl = document.getElementById('api-status');
+  if (statusEl) { statusEl.textContent = '⏳ Nalagam iz Google Sheets...'; statusEl.className = 'save-status'; }
+
+  // Ranges: A=name, B..end=rounds (NO spacer column in API response!)
+  const ligaMap = {
+    '1. liga': 'A1:AB13',   // A=Ekipa, B..AB = 27 rounds, rows 2-11 = ekipe
+    '2. liga': 'A1:AJ16',   // A=Ekipa, B..AJ = 35 rounds (22+13 playoff)
+    '3. liga': 'A1:S23',    // A=Ekipa, B..S = 18 rounds, 20 ekip
+  };
+
+  let allOk = true;
+  for (const [lgName, range] of Object.entries(ligaMap)) {
+    const values = await fetchSheetRange(lgName, range);
+    if (values && values.length > 1) {
+      parseLeagueSheet(values, lgName);
+    } else {
+      allOk = false;
+      console.warn(`Ni podatkov za ${lgName}`);
+    }
+  }
+
+  if (statusEl) {
+    statusEl.textContent = allOk ? '✓ Podatki posodobljeni iz Google Sheets!' : '⚠️ Nekateri podatki niso bili naloženi';
+    statusEl.className = allOk ? 'save-status ok' : 'save-status err';
+    setTimeout(() => { if(statusEl) statusEl.textContent = ''; }, 4000);
+  }
+  document.getElementById('api-banner').style.display = 'none';
+  renderAll();
+}
+
+// ══════════ RENDER ALL ══════════
+function renderAll() {
+  renderSkupaj();
+  renderLeagueTable('1. liga', 'liga1-table', 'liga1-stats');
+  renderLeagueTable('2. liga', 'liga2-table', 'liga2-stats');
+  renderLeagueTable('3. liga', 'liga3-table', 'liga3-stats');
+  if (isAdmin) renderAdminTable();
+}
+
+// Inicializacija
+renderAll();
+</script>
+</body>
+</html>
