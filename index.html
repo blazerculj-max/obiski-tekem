@@ -2433,6 +2433,11 @@ function renderPrimerjava() {
   const d1 = t1.data.map((v,i) => v!==null?{x:lg1.rounds[i],y:v}:null).filter(Boolean);
   const d2 = t2.data.map((v,i) => v!==null?{x:lg2.rounds[i],y:v}:null).filter(Boolean);
 
+  // Če sta iz iste lige, uporabi alternativno barvo za drugi klub
+  const sameLeague = lg1name === lg2name;
+  const color1 = lg1.color;
+  const color2 = sameLeague ? '#e040fb' : lg2.color; // vijolična kot alternativa
+
   const ctx = document.getElementById('primerjava-chart').getContext('2d');
   if (primerjavaChart) primerjavaChart.destroy();
   primerjavaChart = new Chart(ctx, {
@@ -2443,13 +2448,13 @@ function renderPrimerjava() {
         {
           label: t1name,
           data: d1.map(d => d.y),
-          borderColor: lg1.color, backgroundColor: lg1.color+'22',
+          borderColor: color1, backgroundColor: color1+'22',
           borderWidth: 2.5, pointRadius: 4, tension: 0.3, fill: false
         },
         {
           label: t2name,
           data: d2.map(d => d.y),
-          borderColor: lg2.color, backgroundColor: lg2.color+'22',
+          borderColor: color2, backgroundColor: color2+'22',
           borderWidth: 2.5, pointRadius: 4, tension: 0.3, fill: false
         }
       ]
@@ -2465,22 +2470,22 @@ function renderPrimerjava() {
 
   const s1 = teamStats(t1.data), s2 = teamStats(t2.data);
   document.getElementById('primerjava-stats').innerHTML = `
-    <div class="stat-card" style="border-color:${lg1.color}33">
-      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">${t1name}</div>
+    <div class="stat-card" style="border-color:${color1}33">
+      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:${color1};display:inline-block"></span>${t1name}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div><div class="stat-val" style="font-size:22px;color:${lg1.color}">${fmtNum(s1.avg)}</div><div class="stat-label">Povp.</div></div>
-        <div><div class="stat-val" style="font-size:22px;color:${lg1.color}">${fmtNum(s1.max)}</div><div class="stat-label">Rekord</div></div>
-        <div><div class="stat-val" style="font-size:22px;color:${lg1.color}">${fmtNum(s1.total)}</div><div class="stat-label">Skupaj</div></div>
-        <div><div class="stat-val" style="font-size:22px;color:${lg1.color}">${s1.count}</div><div class="stat-label">Tekem</div></div>
+        <div><div class="stat-val" style="font-size:22px;color:${color1}">${fmtNum(s1.avg)}</div><div class="stat-label">Povp.</div></div>
+        <div><div class="stat-val" style="font-size:22px;color:${color1}">${fmtNum(s1.max)}</div><div class="stat-label">Rekord</div></div>
+        <div><div class="stat-val" style="font-size:22px;color:${color1}">${fmtNum(s1.total)}</div><div class="stat-label">Skupaj</div></div>
+        <div><div class="stat-val" style="font-size:22px;color:${color1}">${s1.count}</div><div class="stat-label">Tekem</div></div>
       </div>
     </div>
-    <div class="stat-card" style="border-color:${lg2.color}33">
-      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">${t2name}</div>
+    <div class="stat-card" style="border-color:${color2}33">
+      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:${color2};display:inline-block"></span>${t2name}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div><div class="stat-val" style="font-size:22px;color:${lg2.color}">${fmtNum(s2.avg)}</div><div class="stat-label">Povp.</div></div>
-        <div><div class="stat-val" style="font-size:22px;color:${lg2.color}">${fmtNum(s2.max)}</div><div class="stat-label">Rekord</div></div>
-        <div><div class="stat-val" style="font-size:22px;color:${lg2.color}">${fmtNum(s2.total)}</div><div class="stat-label">Skupaj</div></div>
-        <div><div class="stat-val" style="font-size:22px;color:${lg2.color}">${s2.count}</div><div class="stat-label">Tekem</div></div>
+        <div><div class="stat-val" style="font-size:22px;color:${color2}">${fmtNum(s2.avg)}</div><div class="stat-label">Povp.</div></div>
+        <div><div class="stat-val" style="font-size:22px;color:${color2}">${fmtNum(s2.max)}</div><div class="stat-label">Rekord</div></div>
+        <div><div class="stat-val" style="font-size:22px;color:${color2}">${fmtNum(s2.total)}</div><div class="stat-label">Skupaj</div></div>
+        <div><div class="stat-val" style="font-size:22px;color:${color2}">${s2.count}</div><div class="stat-label">Tekem</div></div>
       </div>
     </div>
   `;
