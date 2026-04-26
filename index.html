@@ -710,6 +710,7 @@ tr.avg-row td:first-child {
       <button class="nav-tab" data-view="liga2">2. Liga</button>
       <button class="nav-tab" data-view="liga3">3. Liga</button>
       <button class="nav-tab" data-view="statistika">Statistika</button>
+      <button class="nav-tab" data-view="napredna">Napredna stat.</button>
       <button class="nav-tab admin-only" data-view="admin" style="display:none">Admin</button>
     </div>
     <div class="nav-right">
@@ -878,6 +879,68 @@ tr.avg-row td:first-child {
       </div>
       <div class="chart-container" style="height:280px">
         <canvas id="trend-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── NAPREDNA STATISTIKA VIEW ── -->
+  <div class="view" id="view-napredna">
+    <div class="page-header">
+      <div class="page-title">
+        <small>Sezona 2025/26</small>
+        Napredna statistika
+      </div>
+    </div>
+
+    <!-- HEATMAP -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">🗓️ Heatmap obiska po kolih</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Temnejša barva = več gledalcev. Klikni na ligo za prikaz.</p>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap" id="heatmap-liga-btns">
+        <button onclick="setHeatmapLiga('1. liga',this)" style="padding:6px 16px;border-radius:100px;border:1px solid var(--blue);background:var(--blue-dim);color:var(--blue);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">1. Liga</button>
+        <button onclick="setHeatmapLiga('2. liga',this)" style="padding:6px 16px;border-radius:100px;border:1px solid var(--border);background:none;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">2. Liga</button>
+        <button onclick="setHeatmapLiga('3. liga',this)" style="padding:6px 16px;border-radius:100px;border:1px solid var(--border);background:none;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">3. Liga</button>
+      </div>
+      <div style="overflow-x:auto">
+        <div id="heatmap-container"></div>
+      </div>
+    </div>
+
+    <!-- TREND RASTI -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">📈 Trend obiska — rast in padec</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Primerjava prve in druge polovice sezone (samo domače tekme). Zeleno = rast, rdeče = padec.</p>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap" id="trend-rast-liga-btns">
+        <button onclick="setTrendRastLiga('1. liga',this)" style="padding:6px 16px;border-radius:100px;border:1px solid var(--blue);background:var(--blue-dim);color:var(--blue);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">1. Liga</button>
+        <button onclick="setTrendRastLiga('2. liga',this)" style="padding:6px 16px;border-radius:100px;border:1px solid var(--border);background:none;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">2. Liga</button>
+        <button onclick="setTrendRastLiga('3. liga',this)" style="padding:6px 16px;border-radius:100px;border:1px solid var(--border);background:none;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">3. Liga</button>
+      </div>
+      <div id="trend-rast-container"></div>
+    </div>
+
+    <!-- KONSISTENTNOST + MEDIANA -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">🔢 Podrobna statistika ekip</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Povprečje, mediana, standardna deviacija in konsistentnost za vsako ekipo.</p>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap" id="ekipe-stat-liga-btns">
+        <button onclick="setEkipeStatLiga('1. liga',this)" style="padding:6px 16px;border-radius:100px;border:1px solid var(--blue);background:var(--blue-dim);color:var(--blue);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">1. Liga</button>
+        <button onclick="setEkipeStatLiga('2. liga',this)" style="padding:6px 16px;border-radius:100px;border:1px solid var(--border);background:none;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">2. Liga</button>
+        <button onclick="setEkipeStatLiga('3. liga',this)" style="padding:6px 16px;border-radius:100px;border:1px solid var(--border);background:none;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">3. Liga</button>
+      </div>
+      <div class="table-wrap" style="border:none;background:transparent">
+        <table id="ekipe-stat-table" style="table-layout:auto">
+          <thead><tr>
+            <th style="text-align:left;padding-left:12px;position:sticky;left:0;background:var(--bg2);min-width:160px">Ekipa</th>
+            <th>Tekem</th>
+            <th>Povp.</th>
+            <th>Mediana</th>
+            <th>Min</th>
+            <th>Max</th>
+            <th>Std. dev.</th>
+            <th>Konsistentnost</th>
+          </tr></thead>
+          <tbody id="ekipe-stat-tbody"></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -1188,6 +1251,7 @@ function switchTab(view) {
   document.querySelector(`[data-view="${view}"]`).classList.add('active');
   document.getElementById(`view-${view}`).classList.add('active');
   if (view === 'statistika') renderStatistika();
+  if (view === 'napredna') renderNaprednaStatistika();
   if (view === 'admin' && isAdmin) renderAdminTable();
 }
 document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -2291,6 +2355,209 @@ function renderTrend() {
       }
     }
   });
+}
+
+// ══════════ NAPREDNA STATISTIKA ══════════
+let heatmapLiga = '1. liga';
+let trendRastLiga = '1. liga';
+let ekipeStatLiga = '1. liga';
+
+function renderNaprednaStatistika() {
+  renderHeatmap();
+  renderTrendRast();
+  renderEkipeStat();
+}
+
+// ── HEATMAP ──
+function setHeatmapLiga(lgName, btn) {
+  heatmapLiga = lgName;
+  document.querySelectorAll('#heatmap-liga-btns button').forEach(b => {
+    b.style.background = 'none'; b.style.color = 'var(--text2)'; b.style.borderColor = 'var(--border)';
+  });
+  const lg = LEAGUE_DATA[lgName];
+  btn.style.background = lg.colorDim; btn.style.color = lg.color; btn.style.borderColor = lg.color;
+  renderHeatmap();
+}
+
+function renderHeatmap() {
+  const lg = LEAGUE_DATA[heatmapLiga];
+  const container = document.getElementById('heatmap-container');
+
+  // Only show redni del rounds for heatmap
+  const regularRounds = lg.rounds.slice(0, lg.playoffStart || lg.rounds.length);
+  const allVals = [];
+  lg.teams.forEach(t => regularRounds.forEach((_, ri) => { if (t.data[ri]) allVals.push(t.data[ri]); }));
+  const maxVal = Math.max(...allVals) || 1;
+  const minVal = Math.min(...allVals) || 0;
+
+  // Round headers
+  let html = '<div style="display:grid;grid-template-columns:160px repeat(' + regularRounds.length + ',1fr);gap:2px;min-width:600px">';
+
+  // Header row
+  html += '<div style="font-size:10px;color:var(--text3);padding:4px 8px;font-weight:600">EKIPA</div>';
+  regularRounds.forEach((r, ri) => {
+    html += '<div style="font-size:9px;color:var(--text3);text-align:center;padding:2px;white-space:nowrap;overflow:hidden">' + (ri+1) + '</div>';
+  });
+
+  // Team rows
+  lg.teams.forEach(t => {
+    html += '<div style="font-size:12px;font-weight:500;padding:4px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-self:center">' + t.name.split(' ').slice(-1)[0] + '</div>';
+    regularRounds.forEach((_, ri) => {
+      const val = t.data[ri];
+      if (val !== null && val !== undefined) {
+        const intensity = (val - minVal) / (maxVal - minVal);
+        const alpha = 0.15 + intensity * 0.85;
+        const textColor = intensity > 0.5 ? '#000' : lg.color;
+        html += '<div title="' + t.name + ' — ' + lg.rounds[ri] + ': ' + fmtNum(val) + '" style="background:' + lg.color + ';opacity:' + alpha + ';border-radius:3px;height:28px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;cursor:default">' + val + '</div>';
+      } else {
+        html += '<div style="background:var(--bg2);border-radius:3px;height:28px;opacity:0.3"></div>';
+      }
+    });
+  });
+
+  html += '</div>';
+
+  // Legend
+  html += '<div style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:11px;color:var(--text2)">';
+  html += '<span>Manj</span>';
+  html += '<div style="display:flex;gap:2px">';
+  [0.15, 0.35, 0.55, 0.75, 0.95].forEach(a => {
+    html += '<div style="width:24px;height:12px;background:' + lg.color + ';opacity:' + a + ';border-radius:2px"></div>';
+  });
+  html += '</div>';
+  html += '<span>Več</span>';
+  html += '<span style="margin-left:12px;color:var(--text3)">Max: ' + fmtNum(maxVal) + ' · Min: ' + fmtNum(minVal) + '</span>';
+  html += '</div>';
+
+  container.innerHTML = html;
+}
+
+// ── TREND RASTI ──
+function setTrendRastLiga(lgName, btn) {
+  trendRastLiga = lgName;
+  document.querySelectorAll('#trend-rast-liga-btns button').forEach(b => {
+    b.style.background = 'none'; b.style.color = 'var(--text2)'; b.style.borderColor = 'var(--border)';
+  });
+  const lg = LEAGUE_DATA[lgName];
+  btn.style.background = lg.colorDim; btn.style.color = lg.color; btn.style.borderColor = lg.color;
+  renderTrendRast();
+}
+
+function renderTrendRast() {
+  const lg = LEAGUE_DATA[trendRastLiga];
+  const container = document.getElementById('trend-rast-container');
+  const playoffStart = lg.playoffStart || lg.rounds.length;
+  const half = Math.floor(playoffStart / 2);
+
+  const ekipe = lg.teams.map(t => {
+    const prva = t.data.slice(0, half).filter(v => v !== null && v !== undefined);
+    const druga = t.data.slice(half, playoffStart).filter(v => v !== null && v !== undefined);
+    const avgPrva = prva.length ? Math.round(prva.reduce((a,b)=>a+b,0)/prva.length) : 0;
+    const avgDruga = druga.length ? Math.round(druga.reduce((a,b)=>a+b,0)/druga.length) : 0;
+    const diff = avgDruga - avgPrva;
+    const pct = avgPrva > 0 ? Math.round((diff / avgPrva) * 100) : 0;
+    return { name: t.name, avgPrva, avgDruga, diff, pct };
+  }).filter(e => e.avgPrva > 0 && e.avgDruga > 0);
+
+  ekipe.sort((a,b) => b.diff - a.diff);
+  const maxAbs = Math.max(...ekipe.map(e => Math.abs(e.diff))) || 1;
+
+  let html = '<div style="display:flex;flex-direction:column;gap:8px">';
+  ekipe.forEach(e => {
+    const isPositive = e.diff >= 0;
+    const color = isPositive ? 'var(--green)' : 'var(--red)';
+    const barWidth = Math.round((Math.abs(e.diff) / maxAbs) * 100);
+    const arrow = isPositive ? '↑' : '↓';
+
+    html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">';
+    html += '<div style="width:160px;font-size:13px;font-weight:500;flex-shrink:0">' + e.name + '</div>';
+    html += '<div style="flex:1;display:flex;align-items:center;gap:8px">';
+    html += '<div style="font-size:11px;color:var(--text3);width:60px;text-align:right">' + fmtNum(e.avgPrva) + '</div>';
+    html += '<div style="flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden">';
+    if (isPositive) {
+      html += '<div style="width:50%;height:100%;background:var(--bg2);float:left"></div>';
+      html += '<div style="width:' + (barWidth/2) + '%;height:100%;background:' + color + ';float:left;border-radius:0 4px 4px 0"></div>';
+    } else {
+      html += '<div style="width:' + (50-barWidth/2) + '%;height:100%;background:var(--bg2);float:left"></div>';
+      html += '<div style="width:' + (barWidth/2) + '%;height:100%;background:' + color + ';float:left;border-radius:4px 0 0 4px"></div>';
+    }
+    html += '</div>';
+    html += '<div style="font-size:11px;color:var(--text3);width:60px">' + fmtNum(e.avgDruga) + '</div>';
+    html += '</div>';
+    html += '<div style="font-family:Bebas Neue,sans-serif;font-size:20px;color:' + color + ';width:80px;text-align:right">' + arrow + ' ' + Math.abs(e.diff) + '</div>';
+    html += '<div style="font-size:11px;color:' + color + ';width:44px;text-align:right">' + (isPositive?'+':'') + e.pct + '%</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  html += '<div style="display:flex;gap:24px;margin-top:12px;font-size:11px;color:var(--text2)">';
+  html += '<span>← 1. polovica (kola 1–' + half + ')</span>';
+  html += '<span>2. polovica (kola ' + (half+1) + '–' + playoffStart + ') →</span>';
+  html += '</div>';
+
+  container.innerHTML = html;
+}
+
+// ── PODROBNA STATISTIKA EKIP ──
+function setEkipeStatLiga(lgName, btn) {
+  ekipeStatLiga = lgName;
+  document.querySelectorAll('#ekipe-stat-liga-btns button').forEach(b => {
+    b.style.background = 'none'; b.style.color = 'var(--text2)'; b.style.borderColor = 'var(--border)';
+  });
+  const lg = LEAGUE_DATA[lgName];
+  btn.style.background = lg.colorDim; btn.style.color = lg.color; btn.style.borderColor = lg.color;
+  renderEkipeStat();
+}
+
+function mediana(arr) {
+  if (!arr.length) return 0;
+  const sorted = [...arr].sort((a,b) => a-b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid-1] + sorted[mid]) / 2);
+}
+
+function stdDev(arr) {
+  if (arr.length < 2) return 0;
+  const avg = arr.reduce((a,b)=>a+b,0) / arr.length;
+  const variance = arr.reduce((a,b) => a + Math.pow(b-avg, 2), 0) / arr.length;
+  return Math.round(Math.sqrt(variance));
+}
+
+function renderEkipeStat() {
+  const lg = LEAGUE_DATA[ekipeStatLiga];
+  const tbody = document.getElementById('ekipe-stat-tbody');
+
+  const rows = lg.teams.map(t => {
+    const vals = t.data.filter(v => v !== null && v !== undefined);
+    if (!vals.length) return null;
+    const avg = Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+    const med = mediana(vals);
+    const sd = stdDev(vals);
+    const konsistentnost = avg > 0 ? Math.max(0, Math.round(100 - (sd/avg*100))) : 0;
+    return { name: t.name, count: vals.length, avg, med, min: Math.min(...vals), max: Math.max(...vals), sd, konsistentnost };
+  }).filter(Boolean);
+
+  rows.sort((a,b) => b.avg - a.avg);
+
+  const maxKons = Math.max(...rows.map(r => r.konsistentnost));
+
+  tbody.innerHTML = rows.map((r, i) => {
+    const konsColor = r.konsistentnost >= 70 ? 'var(--green)' : r.konsistentnost >= 40 ? 'var(--gold)' : 'var(--red)';
+    const konsWidth = Math.round((r.konsistentnost / 100) * 100);
+    return '<tr>'
+      + '<td style="text-align:left;padding-left:12px;position:sticky;left:0;background:var(--card);font-weight:500;cursor:pointer" onclick="openTeamModal(' + JSON.stringify(ekipeStatLiga) + ',' + JSON.stringify(r.name) + ')">'
+      + '<div style="font-size:13px">' + r.name + '</div></td>'
+      + '<td style="color:var(--text2)">' + r.count + '</td>'
+      + '<td><span style="font-family:Bebas Neue,sans-serif;font-size:18px;color:' + lg.color + '">' + fmtNum(r.avg) + '</span></td>'
+      + '<td><span style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--text2)">' + fmtNum(r.med) + '</span></td>'
+      + '<td style="color:var(--text3)">' + fmtNum(r.min) + '</td>'
+      + '<td style="color:var(--text)">' + fmtNum(r.max) + '</td>'
+      + '<td style="color:var(--text2)">±' + fmtNum(r.sd) + '</td>'
+      + '<td><div style="display:flex;align-items:center;gap:6px">'
+      + '<div style="width:60px;height:6px;background:var(--bg2);border-radius:3px;overflow:hidden"><div style="width:' + konsWidth + '%;height:100%;background:' + konsColor + ';border-radius:3px"></div></div>'
+      + '<span style="font-size:12px;color:' + konsColor + ';font-weight:600">' + r.konsistentnost + '%</span>'
+      + '</div></td>'
+      + '</tr>';
+  }).join('');
 }
 
 // ══════════ MULTI-SEZONA ══════════
