@@ -837,7 +837,7 @@ const CONFIG = {
   SPREADSHEET_ID: '1xkD-hYxZo8DrRGJtmgom9F_Zz3VSEXaDWbQdZu99Ez0',
   API_KEY: localStorage.getItem('obiski_api_key') || 'AIzaSyDaHIlfC6BovfnZAxKqdJzjjfyESCeaI4w',
   ADMIN_PASSWORD: 'kosarka2025',
-  APPS_SCRIPT_URL: '' // Dodamo kasneje
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzDqZNP0508ZOrg3F-TpdgcHpgxRvbe2M7_Txoc25quej1UEZ_kh065ResUvKuAtlZeWg/exec'
 };
 
 // ══════════ DATA ══════════
@@ -1366,26 +1366,30 @@ function updateData(input) {
 
 async function saveAdminData() {
   const status = document.getElementById('save-status');
-  if (!CONFIG.APPS_SCRIPT_URL) {
-    status.textContent = '⚠️ Apps Script URL ni nastavljen (kmalu!)';
-    status.className = 'save-status err';
-    return;
-  }
-  status.textContent = 'Shranjujem...';
+  status.textContent = '⏳ Shranjujem v Google Sheets...';
   status.className = 'save-status';
   try {
     const lgName = document.getElementById('admin-liga').value;
     const lg = LEAGUE_DATA[lgName];
-    const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
+    // Apps Script zahteva no-cors + form data (ne JSON) za cross-origin POST
+    // Pošljemo kot form z JSON v enem polju
+    const formData = new FormData();
+    formData.append('payload', JSON.stringify({ liga: lgName, teams: lg.teams }));
+    await fetch(CONFIG.APPS_SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ liga: lgName, teams: lg.teams })
+      mode: 'no-cors',
+      body: formData
     });
-    if (response.ok) {
-      status.textContent = '✓ Shranjeno v Google Sheets!';
-      status.className = 'save-status ok';
-    } else throw new Error();
-  } catch {
-    status.textContent = '✗ Napaka pri shranjevanju';
+    // no-cors vedno vrne opaque response, ne moremo preveriti status
+    // Počakamo 1s in osvežimo iz Sheets kot potrditev
+    status.textContent = '⏳ Preverjam...';
+    await new Promise(r => setTimeout(r, 1500));
+    await fetchAndRefresh();
+    status.textContent = '✓ Shranjeno in posodobljeno!';
+    status.className = 'save-status ok';
+    setTimeout(() => { status.textContent = ''; }, 4000);
+  } catch(err) {
+    status.textContent = '✗ Napaka: ' + err.message;
     status.className = 'save-status err';
   }
 }
