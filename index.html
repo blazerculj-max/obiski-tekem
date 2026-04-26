@@ -9,6 +9,20 @@
 <link rel="apple-touch-icon" href="https://podcastblokada.com/wp-content/uploads/2024/03/logo-new-2024-50px.png">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+#map { height: 520px; border-radius: var(--radius); overflow: hidden; }
+.leaflet-popup-content-wrapper { background: #111827; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: #e8edf5; box-shadow: 0 4px 24px rgba(0,0,0,0.5); }
+.leaflet-popup-tip { background: #111827; }
+.leaflet-popup-content { margin: 14px 16px; }
+.map-popup-name { font-family: "Bebas Neue", sans-serif; font-size: 20px; letter-spacing: 0.05em; margin-bottom: 4px; }
+.map-popup-liga { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+.map-popup-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.map-popup-stat-val { font-family: "Bebas Neue", sans-serif; font-size: 22px; }
+.map-popup-stat-label { font-size: 10px; color: #8899b0; text-transform: uppercase; letter-spacing: 0.06em; }
+.leaflet-container { background: #07090f; }
+</style>
 <style>
 :root {
   --bg: #07090f;
@@ -842,6 +856,7 @@ tr.avg-row td:first-child {
       <button class="nav-tab" data-view="liga3">3. Liga</button>
       <button class="nav-tab" data-view="statistika">Statistika</button>
       <button class="nav-tab" data-view="napredna">Napredna stat.</button>
+      <button class="nav-tab" data-view="zemljevid">🗺️ Zemljevid</button>
       <button class="nav-tab admin-only" data-view="admin" style="display:none">Admin</button>
     </div>
     <div class="nav-right">
@@ -874,6 +889,7 @@ tr.avg-row td:first-child {
       <button class="mobile-nav-btn" data-view="liga3" onclick="mobileNav(this)">🟡 3. Liga</button>
       <button class="mobile-nav-btn" data-view="statistika" onclick="mobileNav(this)">📈 Statistika</button>
       <button class="mobile-nav-btn" data-view="napredna" onclick="mobileNav(this)">🔢 Napredna stat.</button>
+      <button class="mobile-nav-btn" data-view="zemljevid" onclick="mobileNav(this)">🗺️ Zemljevid</button>
       <button class="mobile-nav-btn admin-only" data-view="admin" onclick="mobileNav(this)" style="display:none">⚙️ Admin</button>
     </nav>
     <div class="mobile-menu-actions">
@@ -1104,6 +1120,45 @@ tr.avg-row td:first-child {
           <tbody id="ekipe-stat-tbody"></tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <!-- ── ZEMLJEVID VIEW ── -->
+  <div class="view" id="view-zemljevid">
+    <div class="page-header">
+      <div class="page-title">
+        <small>Sezona 2025/26</small>
+        Zemljevid košarke
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="map-filter-btns">
+        <button onclick="filterMap('vse',this)" style="padding:6px 16px;border-radius:100px;border:1px solid var(--gold);background:var(--gold-dim);color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">Vse lige</button>
+        <button onclick="filterMap('1. liga',this)" style="padding:6px 16px;border-radius:100px;border:1px solid var(--border);background:none;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">1. Liga</button>
+        <button onclick="filterMap('2. liga',this)" style="padding:6px 16px;border-radius:100px;border:1px solid var(--border);background:none;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">2. Liga</button>
+        <button onclick="filterMap('3. liga',this)" style="padding:6px 16px;border-radius:100px;border:1px solid var(--border);background:none;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">3. Liga</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;padding:16px 20px">
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)">
+          <div style="width:12px;height:12px;border-radius:50%;background:var(--blue)"></div> 1. Liga
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)">
+          <div style="width:12px;height:12px;border-radius:50%;background:var(--green)"></div> 2. Liga
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)">
+          <div style="width:12px;height:12px;border-radius:50%;background:var(--amber)"></div> 3. Liga
+        </div>
+        <div style="font-size:12px;color:var(--text3);margin-left:auto">Velikost kroga = povprečni obisk</div>
+      </div>
+    </div>
+
+    <div id="map" style="height:520px;margin-bottom:20px"></div>
+
+    <div class="card">
+      <div class="card-title">🏅 Košarkarski indeks — gledalci na 1000 prebivalcev</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Katera mesta imajo glede na velikost največ košarkarskih navijačev?</p>
+      <div id="indeks-list"></div>
     </div>
   </div>
 
@@ -1416,6 +1471,7 @@ function switchTab(view) {
   document.getElementById(`view-${view}`).classList.add('active');
   if (view === 'statistika') renderStatistika();
   if (view === 'napredna') renderNaprednaStatistika();
+  if (view === 'zemljevid') renderZemljevid();
   if (view === 'admin' && isAdmin) renderAdminTable();
 }
 document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -2566,6 +2622,186 @@ function renderTrend() {
       }
     }
   });
+}
+
+// ══════════ ZEMLJEVID ══════════
+const KLUB_LOKACIJE = {
+  // 1. liga
+  'Ece Triglav Kranj':      { lat: 46.2397, lng: 14.3556, mesto: 'Kranj',              preb: 37000 },
+  'GGD Šenčur':             { lat: 46.2458, lng: 14.4211, mesto: 'Šenčur',             preb: 8500  },
+  'Hopsi Polzela':           { lat: 46.2797, lng: 15.0739, mesto: 'Polzela',            preb: 4000  },
+  'Ilirija':                 { lat: 46.0469, lng: 14.4958, mesto: 'Ljubljana',          preb: 295000},
+  'Kansai Helios Domžale':  { lat: 46.1394, lng: 14.5944, mesto: 'Domžale',            preb: 36000 },
+  'Krka':                    { lat: 45.8014, lng: 15.1717, mesto: 'Novo mesto',         preb: 36000 },
+  'Laško':                   { lat: 46.1547, lng: 15.2356, mesto: 'Laško',              preb: 13000 },
+  'Rogaška':                 { lat: 46.2311, lng: 15.6386, mesto: 'Rogaška Slatina',   preb: 11000 },
+  'Terme Olimia Podčetrtek':{ lat: 46.1564, lng: 15.6019, mesto: 'Podčetrtek',         preb: 3000  },
+  'Šentjur':                 { lat: 46.2178, lng: 15.3944, mesto: 'Šentjur',            preb: 19000 },
+  // 2. liga
+  'Celje':                   { lat: 46.2311, lng: 15.2686, mesto: 'Celje',              preb: 49000 },
+  'Gorica':                  { lat: 45.9558, lng: 13.6422, mesto: 'Nova Gorica',        preb: 32000 },
+  'Hidria':                  { lat: 46.0014, lng: 14.0275, mesto: 'Idrija',             preb: 11500 },
+  'Ipros Vrhnika':           { lat: 45.9689, lng: 14.2961, mesto: 'Vrhnika',            preb: 17000 },
+  'Ježica':                  { lat: 46.0872, lng: 14.5322, mesto: 'Ljubljana (Ježica)', preb: 295000},
+  'LTH Castings':           { lat: 46.1661, lng: 14.3064, mesto: 'Škofja Loka',        preb: 22000 },
+  'Ljubljana':               { lat: 46.0569, lng: 14.5158, mesto: 'Ljubljana',          preb: 295000},
+  'Plama Pur Ilirska Bistrica':{ lat: 45.5639, lng: 14.2303, mesto: 'Ilirska Bistrica',preb: 13000 },
+  'Portorož':                { lat: 45.5131, lng: 13.5906, mesto: 'Portorož',           preb: 3000  },
+  'Postojna':                { lat: 45.7742, lng: 14.2147, mesto: 'Postojna',           preb: 15000 },
+  'Slovan':                  { lat: 46.0469, lng: 14.5258, mesto: 'Ljubljana',          preb: 295000},
+  'Voga Grosuplje':          { lat: 45.9553, lng: 14.6578, mesto: 'Grosuplje',          preb: 22000 },
+  // 3. liga
+  'Armicafe Troti':          { lat: 45.8114, lng: 15.1817, mesto: 'Novo mesto',         preb: 36000 },
+  'Bistrica Kety Emmi':      { lat: 46.3917, lng: 15.5719, mesto: 'Slovenska Bistrica', preb: 13000 },
+  'Branik Maribor':          { lat: 46.5547, lng: 15.6458, mesto: 'Maribor',            preb: 112000},
+  'Cedevita Olimpija Mladi': { lat: 46.0669, lng: 14.5058, mesto: 'Ljubljana',          preb: 295000},
+  'Elektra Šoštanj':         { lat: 46.3789, lng: 15.0489, mesto: 'Šoštanj',            preb: 4000  },
+  'Gorenja vas':             { lat: 46.1050, lng: 14.1464, mesto: 'Gorenja vas',        preb: 2500  },
+  'Hrastnik':                { lat: 46.1467, lng: 15.0856, mesto: 'Hrastnik',           preb: 8500  },
+  'Innoduler Dravograd':     { lat: 46.5897, lng: 15.0194, mesto: 'Dravograd',          preb: 8500  },
+  'Janče ECP Tactical':      { lat: 46.0833, lng: 14.6167, mesto: 'Janče',              preb: 1500  },
+  'Kolpa':                   { lat: 45.5703, lng: 15.1833, mesto: 'Črnomelj',           preb: 8500  },
+  'Konjice':                 { lat: 46.3367, lng: 15.4317, mesto: 'Slovenske Konjice',  preb: 14000 },
+  'Koper':                   { lat: 45.5481, lng: 13.7300, mesto: 'Koper',              preb: 52000 },
+  'Kovinarstvo Bučar Miklavž':{ lat: 46.5058, lng: 15.6969, mesto: 'Miklavž',          preb: 7000  },
+  'Leone Ajdovščina':        { lat: 45.8878, lng: 13.9086, mesto: 'Ajdovščina',         preb: 19000 },
+  'Litija':                  { lat: 46.0606, lng: 14.8294, mesto: 'Litija',             preb: 15000 },
+  'Mesarija Prunk Sežana':   { lat: 45.7081, lng: 13.8719, mesto: 'Sežana',            preb: 13000 },
+  'Nazarje':                 { lat: 46.3186, lng: 14.9189, mesto: 'Nazarje',            preb: 2500  },
+  'Tera Tolmin':             { lat: 46.1867, lng: 13.7317, mesto: 'Tolmin',             preb: 12000 },
+  'Vojnik G7':               { lat: 46.2939, lng: 15.3069, mesto: 'Vojnik',             preb: 8000  },
+  'Vrani Vransko':           { lat: 46.2417, lng: 14.9528, mesto: 'Vransko',            preb: 2500  },
+};
+
+let mapInstance = null;
+let allMarkers = [];
+let activeMapFilter = 'vse';
+
+function initMap() {
+  if (mapInstance) return;
+
+  // Meje Slovenije
+  const sloveniaBounds = L.latLngBounds(
+    [45.42, 13.38], // JZ
+    [46.88, 16.61]  // SV
+  );
+
+  mapInstance = L.map('map', {
+    zoomControl: true,
+    maxBounds: sloveniaBounds.pad(0.05), // malo robov
+    minZoom: 8,
+    maxZoom: 14,
+  });
+
+  // Nastavi pogled na Slovenijo
+  mapInstance.fitBounds(sloveniaBounds);
+
+  // Dark tile layer
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap © CARTO',
+    subdomains: 'abcd',
+    maxZoom: 14
+  }).addTo(mapInstance);
+}
+
+function renderZemljevid() {
+  initMap();
+  // Clear existing markers
+  allMarkers.forEach(m => m.marker.remove());
+  allMarkers = [];
+
+  Object.entries(LEAGUE_DATA).forEach(([lgName, lg]) => {
+    lg.teams.forEach(team => {
+      const loc = KLUB_LOKACIJE[team.name];
+      if (!loc) return;
+      const s = teamStats(team.data);
+      if (!s.avg) return;
+
+      // Size based on avg attendance (min 12, max 45)
+      const allAvgs = Object.values(LEAGUE_DATA).flatMap(l => l.teams.map(t => teamStats(t.data).avg)).filter(Boolean);
+      const maxAvg = Math.max(...allAvgs);
+      const minAvg = Math.min(...allAvgs);
+      const radius = 10 + Math.round(((s.avg - minAvg) / (maxAvg - minAvg)) * 35);
+
+      const marker = L.circleMarker([loc.lat, loc.lng], {
+        radius: radius,
+        fillColor: lg.color,
+        color: '#ffffff',
+        weight: 2,
+        opacity: 0.9,
+        fillOpacity: 0.75
+      });
+
+      const popup = L.popup({ maxWidth: 240, className: '' }).setContent(
+        '<div class="map-popup-name" style="color:' + lg.color + '">' + team.name + '</div>' +
+        '<div class="map-popup-liga" style="color:' + lg.color + '">' + lgName + ' · ' + loc.mesto + '</div>' +
+        '<div class="map-popup-stats">' +
+        '<div><div class="map-popup-stat-val" style="color:' + lg.color + '">' + fmtNum(s.avg) + '</div><div class="map-popup-stat-label">Povp. obisk</div></div>' +
+        '<div><div class="map-popup-stat-val" style="color:' + lg.color + '">' + fmtNum(s.max) + '</div><div class="map-popup-stat-label">Rekord</div></div>' +
+        '<div><div class="map-popup-stat-val" style="color:' + lg.color + '">' + fmtNum(s.total) + '</div><div class="map-popup-stat-label">Skupaj</div></div>' +
+        '<div><div class="map-popup-stat-val" style="color:' + lg.color + '">' + s.count + '</div><div class="map-popup-stat-label">Tekem</div></div>' +
+        '</div>'
+      );
+
+      marker.bindPopup(popup);
+      marker.addTo(mapInstance);
+      allMarkers.push({ marker, liga: lgName, name: team.name });
+    });
+  });
+
+  renderIndeks();
+  setTimeout(() => mapInstance.invalidateSize(), 100);
+}
+
+function filterMap(liga, btn) {
+  activeMapFilter = liga;
+  document.querySelectorAll('#map-filter-btns button').forEach(b => {
+    b.style.background = 'none'; b.style.color = 'var(--text2)'; b.style.borderColor = 'var(--border)';
+  });
+  const color = liga === 'vse' ? 'var(--gold)' : LEAGUE_DATA[liga]?.color || 'var(--gold)';
+  const colorDim = liga === 'vse' ? 'var(--gold-dim)' : (LEAGUE_DATA[liga]?.colorDim || 'var(--gold-dim)');
+  btn.style.background = colorDim; btn.style.color = color; btn.style.borderColor = color;
+
+  allMarkers.forEach(m => {
+    if (liga === 'vse' || m.liga === liga) {
+      m.marker.addTo(mapInstance);
+    } else {
+      m.marker.remove();
+    }
+  });
+}
+
+function renderIndeks() {
+  const el = document.getElementById('indeks-list');
+  const rows = [];
+
+  Object.entries(LEAGUE_DATA).forEach(([lgName, lg]) => {
+    lg.teams.forEach(team => {
+      const loc = KLUB_LOKACIJE[team.name];
+      if (!loc || !loc.preb) return;
+      const s = teamStats(team.data);
+      if (!s.avg) return;
+      const indeks = Math.round((s.avg / loc.preb) * 1000);
+      rows.push({ name: team.name, liga: lgName, lg, mesto: loc.mesto, avg: s.avg, preb: loc.preb, indeks });
+    });
+  });
+
+  rows.sort((a,b) => b.indeks - a.indeks);
+  const maxIndeks = rows[0]?.indeks || 1;
+
+  el.innerHTML = rows.slice(0,15).map((r, i) => {
+    const barW = Math.round((r.indeks / maxIndeks) * 100);
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">'
+      + '<span style="font-family:Bebas Neue,sans-serif;font-size:20px;color:' + (i<3?'var(--gold)':'var(--text3)') + ';width:28px;text-align:center">' + (i+1) + '</span>'
+      + '<div style="flex:1;min-width:0">'
+      + '<div style="font-size:13px;font-weight:600">' + r.name + '</div>'
+      + '<div style="font-size:11px;color:var(--text3)">' + r.mesto + ' · ' + fmtNum(r.preb) + ' preb. · povp. ' + fmtNum(r.avg) + ' gl.</div>'
+      + '<div style="height:4px;background:var(--bg2);border-radius:2px;margin-top:6px;overflow:hidden"><div style="width:' + barW + '%;height:100%;background:' + r.lg.color + ';border-radius:2px"></div></div>'
+      + '</div>'
+      + '<div style="font-family:Bebas Neue,sans-serif;font-size:26px;color:' + r.lg.color + ';flex-shrink:0">' + r.indeks + '</div>'
+      + '<div style="font-size:10px;color:var(--text3);width:36px">/ 1000</div>'
+      + '</div>';
+  }).join('');
 }
 
 // ══════════ NAPREDNA STATISTIKA ══════════
