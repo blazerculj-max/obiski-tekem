@@ -429,6 +429,8 @@ th {
   white-space: nowrap;
   border-bottom: 1px solid var(--border);
   border-right: 1px solid var(--border);
+  overflow: hidden;
+  max-width: 52px;
 }
 th:first-child {
   text-align: left; padding-left: 16px;
@@ -721,9 +723,13 @@ tr.avg-row td:first-child {
 
   /* Tables */
   .table-wrap { border-radius: var(--radius-sm); }
-  th, td { padding: 6px 4px; font-size: 11px; }
-  th:first-child, td:first-child { width: 120px; min-width: 110px; padding-left: 10px; }
-  .att-cell { width: 36px; height: 24px; font-size: 10px; }
+  th { padding: 6px 2px; font-size: 9px; letter-spacing: 0; white-space: nowrap; min-width: 36px; }
+  td { padding: 5px 2px; font-size: 11px; min-width: 36px; }
+  th:first-child { width: 100px; min-width: 100px; padding-left: 8px; font-size: 9px; }
+  td:first-child { width: 100px; min-width: 100px; padding-left: 8px; }
+  td:first-child div:first-child { font-size: 12px; }
+  td:first-child div:last-child { font-size: 9px; }
+  .att-cell { width: 32px; height: 22px; font-size: 9px; border-radius: 4px; }
 
   /* Section tabs */
   .section-tabs { gap: 4px; }
@@ -1706,7 +1712,9 @@ function renderLeagueTable(lgName, containerId, statsId) {
       if (lg.playoffCols && lg.playoffCols.includes(relIdx)) cls = 'playoff-header';
       else if (lg.obstanekCols && lg.obstanekCols.includes(relIdx)) cls = 'obstanek-header';
     }
-    thead += `<th class="${cls}" style="min-width:52px">${r}</th>`;
+    // Short label for mobile: just the number or abbreviation
+    const shortLabel = r.match(/^(\d+)\. kolo$/) ? r.match(/^(\d+)\. kolo$/)[1] : r;
+    thead += `<th class="${cls}" style="min-width:36px" title="${r}">${shortLabel}</th>`;
   });
   thead += `</tr></thead>`;
 
