@@ -634,7 +634,7 @@ tr.avg-row td:first-child {
   <div class="login-bg"></div>
   <div class="login-grid"></div>
   <div class="login-box">
-    <div class="login-badge">🏀 Sezona 2024/25</div>
+    <div class="login-badge">🏀 Sezona 2025/26</div>
     <div class="login-title">Obiski<br><span>Tekem</span></div>
     <div class="login-sub">Slovenska košarka — 1., 2. in 3. liga</div>
     <div class="login-cards">
@@ -674,6 +674,15 @@ tr.avg-row td:first-child {
   <!-- TOP NAV -->
   <nav class="topnav">
     <div class="nav-brand">Obiski <span>Tekem</span></div>
+    <div style="display:flex; align-items:center; margin-right:16px;">
+      <select id="season-select" onchange="switchSeason(this.value)"
+        style="background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius-sm);
+               padding:6px 12px; color:var(--gold); font-size:12px; font-weight:600;
+               font-family:'DM Sans',sans-serif; outline:none; cursor:pointer;">
+        <option value="2025/26">2025/26 ★</option>
+        <option value="2024/25">2024/25</option>
+      </select>
+    </div>
     <div class="nav-tabs">
       <button class="nav-tab active" data-view="skupaj">Skupaj</button>
       <button class="nav-tab" data-view="liga1">1. Liga</button>
@@ -699,7 +708,7 @@ tr.avg-row td:first-child {
 
     <div class="page-header">
       <div class="page-title">
-        <small>Sezona 2024/25</small>
+        <small>Sezona 2025/26</small>
         Lestvica obiska
       </div>
       <div class="toggle-group">
@@ -792,6 +801,50 @@ tr.avg-row td:first-child {
     </div>
 
     <div class="card admin-section">
+      <div class="admin-title">⚡ Hitri vnos</div>
+      <p style="font-size:13px; color:var(--text2); margin-bottom:16px">Prilepi KZS link tekme, izberi podatke in shrani — brez iskanja po tabeli.</p>
+      <div class="form-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:12px; margin-bottom:16px">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>KZS Link tekme</label>
+          <input type="text" id="kzs-url" placeholder="https://www.kzs.si/tekma/106921" 
+            style="width:100%; background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:10px 14px; color:var(--text); font-size:14px; outline:none;"
+            oninput="parseKZSUrl(this.value)">
+        </div>
+        <div class="form-group">
+          <label>Liga</label>
+          <select id="hitri-liga" onchange="updateHitriEkipa()">
+            <option value="">— izberi —</option>
+            <option value="1. liga">1. Liga</option>
+            <option value="2. liga">2. Liga</option>
+            <option value="3. liga">3. Liga</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Ekipa (domača)</label>
+          <select id="hitri-ekipa">
+            <option value="">— najprej izberi ligo —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Kolo</label>
+          <select id="hitri-kolo">
+            <option value="">— najprej izberi ligo —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Število gledalcev</label>
+          <input type="number" id="hitri-gledalci" min="0" placeholder="npr. 120"
+            style="width:100%; background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:10px 14px; color:var(--text); font-size:14px; outline:none;">
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="hitriVnos()">⚡ Shrani tekmo</button>
+        <span id="hitri-status" class="save-status"></span>
+      </div>
+      <div id="hitri-preview" style="margin-top:16px; padding:12px 16px; background:var(--bg2); border-radius:var(--radius-sm); font-size:13px; color:var(--text2); display:none;"></div>
+    </div>
+
+    <div class="card admin-section">
       <div class="admin-title">Vnos gledalcev</div>
       <div class="form-grid">
         <div class="form-group">
@@ -844,18 +897,25 @@ const CONFIG = {
 const LEAGUE_DATA = {
   '1. liga': {
     color: '#3b82f6', colorDim: 'rgba(59,130,246,0.12)', ligaClass: 'liga-1', dotClass: 'dot-liga-1',
-    rounds: Array.from({length:27}, (_,i) => `${i+1}. kolo`),
+    rounds: [
+      ...Array.from({length:27}, (_,i) => `${i+1}. kolo`),
+      'Četrtfinale (1.)','Četrtfinale (2.)','Četrtfinale (3.)',
+      'Polfinale (1.)','Polfinale (2.)','Polfinale (3.)',
+      'Finale (1.)','Finale (2.)','Finale (3.)','Finale (4.)','Finale (5.)'
+    ],
+    playoffStart: 27,
+    playoffCols: [0,1,2,3,4,5,6,7,8,9,10],
     teams: [
-      { name:'Ece Triglav Kranj',     data:[null,350,null,272,null,350,null,null,220,160,null,500,null,217,null,300,220,null,150,300,null,380,null,null,null,null,null] },
-      { name:'GGD Šenčur',            data:[100,null,300,65,300,null,220,116,null,null,100,null,null,null,300,null,null,80,60,null,100,null,60,100,null,null,null] },
-      { name:'Hopsi Polzela',          data:[null,310,null,null,340,null,150,null,300,200,null,200,300,null,200,null,190,null,null,600,null,300,null,null,325,null,null] },
-      { name:'Ilirija',               data:[100,null,220,null,116,150,null,null,null,null,100,null,200,null,null,100,97,100,90,null,50,null,150,100,null,null,null] },
-      { name:'Kansai Helios Domžale', data:[400,150,300,400,null,250,null,200,null,null,null,null,null,300,null,150,null,200,100,null,200,null,150,null,150,null,null] },
-      { name:'Krka',                  data:[null,null,null,null,null,null,null,80,null,90,70,100,70,200,100,120,null,100,100,null,100,117,null,null,70,null,null] },
-      { name:'Laško',                 data:[150,100,null,150,null,400,null,250,null,null,null,100,null,300,null,100,null,150,null,100,null,100,null,null,null,null,null] },
-      { name:'Rogaška',               data:[null,null,300,null,250,150,270,150,150,250,200,null,200,null,null,null,null,null,null,300,null,null,200,170,null,null,null] },
-      { name:'Terme Olimia Podčetrtek',data:[null,150,null,200,null,null,100,null,150,150,null,250,null,250,200,null,100,null,null,50,null,100,null,100,null,null,null] },
-      { name:'Šentjur',               data:[437,null,250,null,100,null,100,null,180,null,200,null,320,null,600,null,200,null,null,null,250,null,200,100,null,null,null] },
+      { name:'Ece Triglav Kranj',     data:[null,350,null,272,null,350,null,null,220,160,null,500,null,217,null,300,220,null,150,300,null,380,null,null,null,null,null, null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'GGD Šenčur',            data:[100,null,300,65,300,null,220,116,null,null,100,null,null,null,300,null,null,80,60,null,100,null,60,100,null,null,null, null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Hopsi Polzela',          data:[null,310,null,null,340,null,150,null,300,200,null,200,300,null,200,null,190,null,null,600,null,300,null,null,325,null,null, null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Ilirija',               data:[100,null,220,null,116,150,null,null,null,null,100,null,200,null,null,100,97,100,90,null,50,null,150,100,null,null,null, null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Kansai Helios Domžale', data:[400,150,300,400,null,250,null,200,null,null,null,null,null,300,null,150,null,200,100,null,200,null,150,null,150,null,null, null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Krka',                  data:[null,null,null,null,null,null,null,80,null,90,70,100,70,200,100,120,null,100,100,null,100,117,null,null,70,null,null, null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Laško',                 data:[150,100,null,150,null,400,null,250,null,null,null,100,null,300,null,100,null,150,null,100,null,100,null,null,null,null,null, null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Rogaška',               data:[null,null,300,null,250,150,270,150,150,250,200,null,200,null,null,null,null,null,null,300,null,null,200,170,null,null,null, null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Terme Olimia Podčetrtek',data:[null,150,null,200,null,null,100,null,150,150,null,250,null,250,200,null,100,null,null,50,null,100,null,100,null,null,null, null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Šentjur',               data:[437,null,250,null,100,null,100,null,180,null,200,null,320,null,600,null,200,null,null,null,250,null,200,100,null,null,null, null,null,null,null,null,null,null,null,null,null,null] },
     ]
   },
   '2. liga': {
@@ -887,28 +947,36 @@ const LEAGUE_DATA = {
   },
   '3. liga': {
     color: '#f59e0b', colorDim: 'rgba(245,158,11,0.12)', ligaClass: 'liga-3', dotClass: 'dot-liga-3',
-    rounds: Array.from({length:18}, (_,i) => `${i+1}. kolo`),
+    rounds: [
+      ...Array.from({length:18}, (_,i) => `${i+1}. kolo`),
+      'Osmina finala (1.)','Osmina finala (2.)',
+      'Četrtfinale (1.)','Četrtfinale (2.)',
+      'Polfinale (1.)','Polfinale (2.)','Polfinale (3.)',
+      'Finale (1.)','Finale (2.)','Finale (3.)'
+    ],
+    playoffStart: 18,
+    playoffCols: [0,1,2,3,4,5,6,7,8,9],
     teams: [
-      { name:'Armicafe Troti',            data:[null,null,null,80,null,null,50,null,60,60,30,90,null,50,120,null,30,null] },
-      { name:'Bistrica Kety Emmi',        data:[null,null,150,null,100,null,150,null,60,100,130,null,50,null,200,null,100,null] },
-      { name:'Branik Maribor',            data:[100,100,null,null,70,null,150,null,90,null,null,80,120,null,200,null,50,null] },
-      { name:'Cedevita Olimpija Mladi',   data:[null,null,null,40,null,60,null,22,null,30,20,50,null,50,null,20,null,60] },
-      { name:'Elektra Šoštanj',           data:[150,null,100,null,null,120,null,200,null,null,98,null,100,90,null,80,null,100] },
-      { name:'Gorenja vas',               data:[120,null,80,null,130,120,null,80,null,null,150,null,130,null,null,100,null,120] },
-      { name:'Hrastnik',                  data:[null,50,null,80,80,211,null,80,null,80,null,60,null,null,null,55,null,70] },
-      { name:'Innoduler Dravograd',       data:[159,null,150,null,150,null,157,null,100,null,150,null,80,null,100,null,80,null] },
-      { name:'Janče ECP Tactical',        data:[null,50,null,null,39,null,40,null,40,30,null,70,100,null,50,null,80,null] },
-      { name:'Kolpa',                     data:[60,99,60,null,50,null,60,60,null,null,null,null,60,null,50,null,null,80] },
-      { name:'Konjice',                   data:[120,200,null,100,null,100,null,80,60,null,null,90,null,50,null,200,null,null] },
-      { name:'Koper',                     data:[80,null,70,null,140,null,100,null,80,null,200,null,80,null,200,null,150,null] },
-      { name:'Kovinarstvo Bučar Miklavž', data:[null,80,null,120,null,150,null,null,null,50,null,80,null,70,null,50,40,80] },
-      { name:'Leone Ajdovščina',          data:[100,null,100,103,null,200,null,100,null,null,200,null,null,130,null,100,null,120] },
-      { name:'Litija',                    data:[null,120,118,null,70,null,110,null,50,59,null,null,70,null,100,null,100,null] },
-      { name:'Mesarija Prunk Sežana',     data:[300,300,null,100,null,120,null,120,null,null,null,70,null,250,null,70,null,100] },
-      { name:'Nazarje',                   data:[null,120,null,90,null,null,70,null,50,100,null,50,null,55,80,null,40,null] },
-      { name:'Tera Tolmin',               data:[null,80,null,80,null,70,null,null,70,100,null,100,null,100,null,70,70,null] },
-      { name:'Vojnik G7',                 data:[60,null,50,80,null,50,null,50,null,null,50,null,null,60,null,100,null,70] },
-      { name:'Vrani Vransko',             data:[null,null,100,null,80,null,70,100,null,100,70,null,100,null,100,null,null,100] },
+      { name:'Armicafe Troti',            data:[null,null,null,80,null,null,50,null,60,60,30,90,null,50,120,null,30,null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Bistrica Kety Emmi',        data:[null,null,150,null,100,null,150,null,60,100,130,null,50,null,200,null,100,null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Branik Maribor',            data:[100,100,null,null,70,null,150,null,90,null,null,80,120,null,200,null,50,null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Cedevita Olimpija Mladi',   data:[null,null,null,40,null,60,null,22,null,30,20,50,null,50,null,20,null,60,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Elektra Šoštanj',           data:[150,null,100,null,null,120,null,200,null,null,98,null,100,90,null,80,null,100,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Gorenja vas',               data:[120,null,80,null,130,120,null,80,null,null,150,null,130,null,null,100,null,120,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Hrastnik',                  data:[null,50,null,80,80,211,null,80,null,80,null,60,null,null,null,55,null,70,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Innoduler Dravograd',       data:[159,null,150,null,150,null,157,null,100,null,150,null,80,null,100,null,80,null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Janče ECP Tactical',        data:[null,50,null,null,39,null,40,null,40,30,null,70,100,null,50,null,80,null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Kolpa',                     data:[60,99,60,null,50,null,60,60,null,null,null,null,60,null,50,null,null,80,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Konjice',                   data:[120,200,null,100,null,100,null,80,60,null,null,90,null,50,null,200,null,null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Koper',                     data:[80,null,70,null,140,null,100,null,80,null,200,null,80,null,200,null,150,null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Kovinarstvo Bučar Miklavž', data:[null,80,null,120,null,150,null,null,null,50,null,80,null,70,null,50,40,80,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Leone Ajdovščina',          data:[100,null,100,103,null,200,null,100,null,null,200,null,null,130,null,100,null,120,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Litija',                    data:[null,120,118,null,70,null,110,null,50,59,null,null,70,null,100,null,100,null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Mesarija Prunk Sežana',     data:[300,300,null,100,null,120,null,120,null,null,null,70,null,250,null,70,null,100,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Nazarje',                   data:[null,120,null,90,null,null,70,null,50,100,null,50,null,55,80,null,40,null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Tera Tolmin',               data:[null,80,null,80,null,70,null,null,70,100,null,100,null,100,null,70,70,null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Vojnik G7',                 data:[60,null,50,80,null,50,null,50,null,null,50,null,null,60,null,100,null,70,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Vrani Vransko',             data:[null,null,100,null,80,null,70,100,null,100,70,null,100,null,100,null,null,100,null,null,null,null,null,null,null,null,null,null] },
     ]
   }
 };
@@ -1326,6 +1394,86 @@ document.getElementById('team-modal').addEventListener('click', e => {
   if (e.target === document.getElementById('team-modal')) closeTeamModal();
 });
 
+// ══════════ HITRI VNOS ══════════
+function parseKZSUrl(val) {
+  // Izvleci ID iz URLja
+  const match = val.match(/\/tekma\/(\d+)/);
+  const id = match ? match[1] : null;
+  const preview = document.getElementById('hitri-preview');
+  if (id) {
+    preview.style.display = 'block';
+    preview.innerHTML = `🔗 Tekma ID: <strong style="color:var(--gold)">${id}</strong> — Zdaj izberi ligo, ekipo, kolo in vnesi gledalce.`;
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+function updateHitriEkipa() {
+  const lgName = document.getElementById('hitri-liga').value;
+  const ekipaEl = document.getElementById('hitri-ekipa');
+  const koloEl = document.getElementById('hitri-kolo');
+
+  if (!lgName) {
+    ekipaEl.innerHTML = '<option value="">— najprej izberi ligo —</option>';
+    koloEl.innerHTML = '<option value="">— najprej izberi ligo —</option>';
+    return;
+  }
+
+  const lg = LEAGUE_DATA[lgName];
+  ekipaEl.innerHTML = '<option value="">— izberi ekipo —</option>' +
+    lg.teams.map((t,i) => `<option value="${i}">${t.name}</option>`).join('');
+
+  koloEl.innerHTML = '<option value="">— izberi kolo —</option>' +
+    lg.rounds.map((r,i) => `<option value="${i}">${r}</option>`).join('');
+}
+
+async function hitriVnos() {
+  const status = document.getElementById('hitri-status');
+  const lgName = document.getElementById('hitri-liga').value;
+  const teamIdx = document.getElementById('hitri-ekipa').value;
+  const roundIdx = document.getElementById('hitri-kolo').value;
+  const gledalci = document.getElementById('hitri-gledalci').value;
+
+  if (!lgName || teamIdx === '' || roundIdx === '' || !gledalci) {
+    status.textContent = '⚠️ Izpolni vsa polja!';
+    status.className = 'save-status err';
+    return;
+  }
+
+  const lg = LEAGUE_DATA[lgName];
+  const team = lg.teams[parseInt(teamIdx)];
+  const round = lg.rounds[parseInt(roundIdx)];
+  const val = parseInt(gledalci);
+
+  // Posodobi lokalne podatke
+  team.data[parseInt(roundIdx)] = val;
+
+  status.textContent = '⏳ Shranjujem...';
+  status.className = 'save-status';
+
+  // Shrani v Sheets
+  const payload = encodeURIComponent(JSON.stringify({ liga: lgName, teams: lg.teams }));
+  await fetch(`${CONFIG.APPS_SCRIPT_URL}?payload=${payload}`, { mode: 'no-cors' });
+
+  await new Promise(r => setTimeout(r, 1500));
+  await fetchAndRefresh();
+
+  status.textContent = `✓ ${team.name} — ${round}: ${fmtNum(val)} gledalcev`;
+  status.className = 'save-status ok';
+
+  // Počisti forma
+  document.getElementById('hitri-gledalci').value = '';
+  document.getElementById('hitri-preview').style.display = 'none';
+  document.getElementById('kzs-url').value = '';
+
+  setTimeout(() => { status.textContent = ''; }, 5000);
+
+  // Osveži tabelo
+  renderLeagueTable(lgName, `liga${lgName[0]}-table`, `liga${lgName[0]}-stats`);
+  renderSkupaj();
+  if (isAdmin) renderAdminTable();
+}
+
 // ══════════ ADMIN TABLE ══════════
 function renderAdminTable() {
   const lgName = document.getElementById('admin-liga').value;
@@ -1373,12 +1521,9 @@ async function saveAdminData() {
     const lg = LEAGUE_DATA[lgName];
     // Apps Script zahteva no-cors + form data (ne JSON) za cross-origin POST
     // Pošljemo kot form z JSON v enem polju
-    await fetch(CONFIG.APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ liga: lgName, teams: lg.teams })
-    });
+    // GET request - edini zanesljiv način za Apps Script brez CORS napak
+    const payload = encodeURIComponent(JSON.stringify({ liga: lgName, teams: lg.teams }));
+    await fetch(`${CONFIG.APPS_SCRIPT_URL}?payload=${payload}`, { mode: 'no-cors' });
     // no-cors vedno vrne opaque response, ne moremo preveriti status
     // Počakamo 1s in osvežimo iz Sheets kot potrditev
     status.textContent = '⏳ Preverjam...';
@@ -1489,6 +1634,67 @@ function renderAll() {
   renderLeagueTable('2. liga', 'liga2-table', 'liga2-stats');
   renderLeagueTable('3. liga', 'liga3-table', 'liga3-stats');
   if (isAdmin) renderAdminTable();
+}
+
+// ══════════ MULTI-SEZONA ══════════
+const HISTORICAL_SEASONS = {
+  '2024/25': {
+    '1. liga': {
+      color: '#3b82f6', colorDim: 'rgba(59,130,246,0.12)', ligaClass: 'liga-1', dotClass: 'dot-liga-1',
+      rounds: Array.from({length:27}, (_,i) => `${i+1}. kolo`),
+      teams: [
+        { name:'Ece Triglav Kranj', data:Array(27).fill(null) },
+        { name:'GGD Šenčur', data:Array(27).fill(null) },
+        { name:'Hopsi Polzela', data:Array(27).fill(null) },
+        { name:'Ilirija', data:Array(27).fill(null) },
+        { name:'Kansai Helios Domžale', data:Array(27).fill(null) },
+        { name:'Krka', data:Array(27).fill(null) },
+        { name:'Laško', data:Array(27).fill(null) },
+        { name:'Rogaška', data:Array(27).fill(null) },
+        { name:'Terme Olimia Podčetrtek', data:Array(27).fill(null) },
+        { name:'Šentjur', data:Array(27).fill(null) },
+      ]
+    },
+    '2. liga': {
+      color: '#10b981', colorDim: 'rgba(16,185,129,0.12)', ligaClass: 'liga-2', dotClass: 'dot-liga-2',
+      rounds: Array.from({length:22}, (_,i) => `${i+1}. kolo`),
+      teams: []
+    },
+    '3. liga': {
+      color: '#f59e0b', colorDim: 'rgba(245,158,11,0.12)', ligaClass: 'liga-3', dotClass: 'dot-liga-3',
+      rounds: Array.from({length:18}, (_,i) => `${i+1}. kolo`),
+      teams: []
+    }
+  }
+};
+
+let activeSeason = '2025/26';
+// Shrani original 25/26 data
+const SEASON_2526 = JSON.parse(JSON.stringify(LEAGUE_DATA));
+
+function switchSeason(season) {
+  activeSeason = season;
+
+  if (season === '2025/26') {
+    // Obnovi live data iz Sheets
+    Object.keys(LEAGUE_DATA).forEach(lg => {
+      LEAGUE_DATA[lg] = SEASON_2526[lg];
+    });
+    fetchAndRefresh();
+  } else {
+    // Naloži zgodovinske podatke
+    const hist = HISTORICAL_SEASONS[season];
+    if (hist) {
+      Object.keys(LEAGUE_DATA).forEach(lg => {
+        if (hist[lg]) LEAGUE_DATA[lg] = hist[lg];
+      });
+    }
+    renderAll();
+  }
+
+  // Posodobi badge
+  const badge = document.querySelector('.login-badge');
+  if (badge) badge.textContent = '🏀 Sezona ' + season;
 }
 
 // Inicializacija
