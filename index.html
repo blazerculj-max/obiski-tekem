@@ -1373,12 +1373,11 @@ async function saveAdminData() {
     const lg = LEAGUE_DATA[lgName];
     // Apps Script zahteva no-cors + form data (ne JSON) za cross-origin POST
     // Pošljemo kot form z JSON v enem polju
-    const formData = new FormData();
-    formData.append('payload', JSON.stringify({ liga: lgName, teams: lg.teams }));
     await fetch(CONFIG.APPS_SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
-      body: formData
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ liga: lgName, teams: lg.teams })
     });
     // no-cors vedno vrne opaque response, ne moremo preveriti status
     // Počakamo 1s in osvežimo iz Sheets kot potrditev
