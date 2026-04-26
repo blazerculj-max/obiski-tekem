@@ -1666,6 +1666,8 @@ function chartOptions(title, showLegend=true) {
         border: { color: 'rgba(255,255,255,0.08)' }
       },
       y: {
+        beginAtZero: true,
+        min: 0,
         ticks: { color: '#4a5a70', font: { size: 11 }, callback: v => fmtNum(v) },
         grid: { color: 'rgba(255,255,255,0.04)' },
         border: { color: 'rgba(255,255,255,0.08)' }
@@ -1884,6 +1886,14 @@ function openTeamModal(lgName, teamName) {
       plugins: {
         ...chartOptions('').plugins,
         legend: { display: true, labels: { color: '#8899b0', font: { size: 11 } } }
+      },
+      scales: {
+        ...chartOptions('').scales,
+        y: {
+          ...chartOptions('').scales.y,
+          beginAtZero: true, // Y os vedno začne pri 0
+          min: 0,
+        }
       }
     }
   });
