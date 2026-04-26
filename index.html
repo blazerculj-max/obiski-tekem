@@ -1331,25 +1331,25 @@ const LEAGUE_DATA = {
       ...Array.from({length:22}, (_,i) => `${i+1}. kolo`),
       'QF-1','O 1.','QF-2','O 2.',
       'QF-3','O 3.','SF-1','O 4.',
-      'SF-2','O 5.','F-1','O 6.','F-2'
+      'SF-2','O 5.','F-1','O 6.','F-2','F-3'
     ],
     // Playoff columns start at index 22
     playoffStart: 22,
-    playoffCols: [0,2,4,6,8,10,12], // even = playoff
-    obstanekCols: [1,3,5,7,9,11],   // odd = liga za obstanek
+    playoffCols: [0,2,4,6,8,10,12,13], // playoff cols
+    obstanekCols: [1,3,5,7,9,11],       // liga za obstanek
     teams: [
-      { name:'Celje',                      data:[null,100,null,50,null,null,100,null,150,null,80,50,null,60,null,50,50,null,70,null,100,null, null,null,500,null,null,null,null,null,null,null,null,null,null] },
-      { name:'Gorica',                     data:[250,null,200,null,250,null,200,null,150,300,null,null,230,null,150,null,300,null,150,null,null,150, 300,null,null,null,null,null,500,null,null,null,null,null,null] },
-      { name:'Hidria',                     data:[null,null,null,null,250,null,302,null,303,null,450,500,400,700,600,null,600,null,600,null,400,null, null,null,null,250,null,null,null,350,null,null,null,300,null] },
-      { name:'Ipros Vrhnika',              data:[350,null,310,null,200,null,300,null,100,null,100,null,100,null,230,null,200,null,153,null,150,null, 200,null,null,null,300,null,null,null,150,null,null,null,null] },
-      { name:'Ježica',                     data:[null,70,null,100,null,150,null,50,null,null,100,70,null,100,null,100,null,100,null,60,70,null, null,null,null,null,null,70,null,100,null,67,null,null,null] },
-      { name:'LTH Castings',              data:[200,150,null,200,null,120,null,100,null,150,null,null,null,100,null,132,null,120,null,150,null,60, 300,null,null,null,null,null,null,null,550,null,null,null,null] },
-      { name:'Ljubljana',                  data:[null,123,null,100,null,60,null,70,null,100,null,100,null,100,null,50,null,40,null,47,null,70, null,100,null,null,null,null,null,null,null,100,null,100,null] },
-      { name:'Plama Pur Ilirska Bistrica', data:[622,null,620,755,null,811,null,820,null,450,null,null,520,null,null,400,null,400,null,620,null,1000, 650,null,null,null,650,null,800,null,null,null,1300,null,null] },
-      { name:'Portorož',                   data:[100,null,120,null,64,null,100,100,null,150,null,null,200,null,160,null,120,null,null,300,null,140, null,null,300,null,null,null,null,null,null,null,null,null,null] },
-      { name:'Postojna',                   data:[null,150,null,170,null,180,null,null,100,null,850,200,null,200,null,250,null,150,200,null,100,null, null,200,null,150,null,150,null,null,null,null,null,null,null] },
-      { name:'Slovan',                     data:[null,200,120,null,110,null,100,null,250,null,130,150,null,null,150,null,130,null,120,null,110,null, null,null,200,null,null,null,null,null,null,null,null,null,null] },
-      { name:'Voga Grosuplje',             data:[450,null,287,null,250,200,null,500,null,500,null,null,200,null,500,null,null,250,null,600,null,400, null,null,600,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Celje',                      data:[null,100,null,50,null,null,100,null,150,null,80,50,null,60,null,50,50,null,70,null,100,null,null,null,500,null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Gorica',                     data:[250,null,200,null,250,null,200,null,150,300,null,null,230,null,150,null,300,null,150,null,null,150,300,null,null,null,null,null,500,null,null,null,null,null,null,null] },
+      { name:'Hidria',                     data:[null,null,null,null,250,null,302,null,303,null,450,500,400,700,600,null,600,null,600,null,400,null,null,null,null,250,null,null,null,350,null,null,null,300,null,null] },
+      { name:'Ipros Vrhnika',              data:[350,null,310,null,200,null,300,null,100,null,100,null,100,null,230,null,200,null,153,null,150,null,200,null,null,null,300,null,null,null,150,null,null,null,null,null] },
+      { name:'Ježica',                     data:[null,70,null,100,null,150,null,50,null,null,100,70,null,100,null,100,null,100,null,60,70,null,null,null,null,null,null,70,null,100,null,67,null,null,null,null] },
+      { name:'LTH Castings',              data:[200,150,null,200,null,120,null,100,null,150,null,null,null,100,null,132,null,120,null,150,null,60,300,null,null,null,null,null,null,null,550,null,null,null,null,null] },
+      { name:'Ljubljana',                  data:[null,123,null,100,null,60,null,70,null,100,null,100,null,100,null,50,null,40,null,47,null,70,null,100,null,null,null,null,null,null,null,100,null,100,null,null] },
+      { name:'Plama Pur Ilirska Bistrica', data:[622,null,620,755,null,811,null,820,null,450,null,null,520,null,null,400,null,400,null,620,null,1000,650,null,null,null,650,null,800,null,null,null,1300,null,null,null] },
+      { name:'Portorož',                   data:[100,null,120,null,64,null,100,100,null,150,null,null,200,null,160,null,120,null,null,300,null,140,null,null,300,null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Postojna',                   data:[null,150,null,170,null,180,null,null,100,null,850,200,null,200,null,250,null,150,200,null,100,null,null,200,null,150,null,150,null,null,null,null,null,null,null,null] },
+      { name:'Slovan',                     data:[null,200,120,null,110,null,100,null,250,null,130,150,null,null,150,null,130,null,120,null,110,null,null,null,200,null,null,null,null,null,null,null,null,null,null,null] },
+      { name:'Voga Grosuplje',             data:[450,null,287,null,250,200,null,500,null,500,null,null,200,null,500,null,null,250,null,600,null,400,null,null,600,null,null,null,null,null,null,null,null,null,null,null] },
     ]
   },
   '3. liga': {
@@ -2195,7 +2195,7 @@ async function fetchAndRefresh() {
   // Ranges: A=name, B..end=rounds (NO spacer column in API response!)
   const ligaMap = {
     '1. liga': 'A1:AM15',   // A=Ekipa, B..AM = 27 redni + 11 playoff = 38 kol
-    '2. liga': 'A1:AJ17',   // A=Ekipa, B..AJ = 22 redni + 13 playoff/obstanek = 35 kol
+    '2. liga': 'A1:AK17',   // A=Ekipa, B..AK = 22 redni + 14 playoff/obstanek = 36 kol
     '3. liga': 'A1:AG25',   // A=Ekipa, B..AG = 18 redni + 14 playoff/obstanek = 32 kol
   };
 
@@ -2420,7 +2420,7 @@ function buildNewSeasonData(season, teams, rounds1, rounds2, rounds3) {
     ...Array.from({length:rounds2}, (_,i) => (i+1)+'. kolo'),
     'QF-1','O 1.','QF-2','O 2.',
     'QF-3','O 3.','SF-1','O 4.',
-    'SF-2','O 5.','F-1','O 6.','F-2'
+    'SF-2','O 5.','F-1','O 6.','F-2','F-3'
   ];
   const liga3Rounds = [
     ...Array.from({length:rounds3}, (_,i) => (i+1)+'. kolo'),
@@ -2442,7 +2442,7 @@ function buildNewSeasonData(season, teams, rounds1, rounds2, rounds3) {
     '2. liga': {
       color:'#10b981', colorDim:'rgba(16,185,129,0.12)', ligaClass:'liga-2', dotClass:'dot-liga-2',
       rounds: liga2Rounds, playoffStart: rounds2,
-      playoffCols: [0,2,4,6,8,10,12], obstanekCols: [1,3,5,7,9,11],
+      playoffCols: [0,2,4,6,8,10,12,13], obstanekCols: [1,3,5,7,9,11],
       teams: []
     },
     '3. liga': {
