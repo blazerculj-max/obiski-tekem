@@ -1004,9 +1004,9 @@ const LEAGUE_DATA = {
     color: '#3b82f6', colorDim: 'rgba(59,130,246,0.12)', ligaClass: 'liga-1', dotClass: 'dot-liga-1',
     rounds: [
       ...Array.from({length:27}, (_,i) => `${i+1}. kolo`),
-      'Četrtfinale (1.)','Četrtfinale (2.)','Četrtfinale (3.)',
-      'Polfinale (1.)','Polfinale (2.)','Polfinale (3.)',
-      'Finale (1.)','Finale (2.)','Finale (3.)','Finale (4.)','Finale (5.)'
+      'QF-1','QF-2','QF-3',
+      'SF-1','SF-2','SF-3',
+      'F-1','F-2','F-3','F-4','F-5'
     ],
     playoffStart: 27,
     playoffCols: [0,1,2,3,4,5,6,7,8,9,10],
@@ -1027,9 +1027,9 @@ const LEAGUE_DATA = {
     color: '#10b981', colorDim: 'rgba(16,185,129,0.12)', ligaClass: 'liga-2', dotClass: 'dot-liga-2',
     rounds: [
       ...Array.from({length:22}, (_,i) => `${i+1}. kolo`),
-      'Četrtfinale (1.)','Liga za obst. 1.','Četrtfinale (2.)','Liga za obst. 2.',
-      'Četrtfinale (3.)','Liga za obst. 3.','Polfinale (1.)','Liga za obst. 4.',
-      'Polfinale (2.)','Liga za obst. 5.','Finale (1.)','Liga za obst. 6.','Finale (2.)'
+      'QF-1','O 1.','QF-2','O 2.',
+      'QF-3','O 3.','SF-1','O 4.',
+      'SF-2','O 5.','F-1','O 6.','F-2'
     ],
     // Playoff columns start at index 22
     playoffStart: 22,
@@ -1054,12 +1054,12 @@ const LEAGUE_DATA = {
     color: '#f59e0b', colorDim: 'rgba(245,158,11,0.12)', ligaClass: 'liga-3', dotClass: 'dot-liga-3',
     rounds: [
       ...Array.from({length:18}, (_,i) => `${i+1}. kolo`),
-      'Osmina finala (1.)','Liga za obst. 1.',
-      'Osmina finala (2.)','Liga za obst. 2.',
-      'Četrtfinale (1.)','Liga za obst. 3.',
-      'Četrtfinale (2.)','Liga za obst. 4.',
-      'Polfinale (1.)','Polfinale (2.)','Polfinale (3.)',
-      'Finale (1.)','Finale (2.)','Finale (3.)'
+      '1/8-1','O 1.',
+      '1/8-2','O 2.',
+      'QF-1','O 3.',
+      'QF-2','O 4.',
+      'SF-1','SF-2','SF-3',
+      'F-1','F-2','F-3'
     ],
     playoffStart: 18,
     playoffCols: [0,2,4,6,8,9,10,11,12,13],
@@ -1411,7 +1411,9 @@ function renderSectionTabs(lgName) {
     const isActive = activeSections[lgName] === i;
     const activeStyle = isActive ? ' style="background:' + s.color + ';border-color:' + s.color + '"' : '';
     const cls = 'section-tab' + (isActive ? ' active' : '');
-    const oc = 'switchSection(' + JSON.stringify(lgName) + ',' + i + ')';
+    // Uporabi escaped enojne narekovaje za onclick atribut (izogibamo se dvojnim narekovajem znotraj onclick="...")
+    const lgEscaped = lgName.replace(/'/g, "\'");
+    const oc = "switchSection('" + lgEscaped + "'," + i + ")";
     return '<button class="' + cls + '"' + activeStyle + ' onclick="' + oc + '">' + s.label + '</button>';
   }).join('');
 }
@@ -2004,24 +2006,24 @@ function buildNewSeasonData(season, teams, rounds1, rounds2, rounds3) {
   // Redni del + avtomatska playoff struktura po ligi
   const liga1Rounds = [
     ...Array.from({length:rounds1}, (_,i) => (i+1)+'. kolo'),
-    'Četrtfinale (1.)','Četrtfinale (2.)','Četrtfinale (3.)',
-    'Polfinale (1.)','Polfinale (2.)','Polfinale (3.)',
-    'Finale (1.)','Finale (2.)','Finale (3.)','Finale (4.)','Finale (5.)'
+    'QF-1','QF-2','QF-3',
+    'SF-1','SF-2','SF-3',
+    'F-1','F-2','F-3','F-4','F-5'
   ];
   const liga2Rounds = [
     ...Array.from({length:rounds2}, (_,i) => (i+1)+'. kolo'),
-    'Četrtfinale (1.)','Liga za obst. 1.','Četrtfinale (2.)','Liga za obst. 2.',
-    'Četrtfinale (3.)','Liga za obst. 3.','Polfinale (1.)','Liga za obst. 4.',
-    'Polfinale (2.)','Liga za obst. 5.','Finale (1.)','Liga za obst. 6.','Finale (2.)'
+    'QF-1','O 1.','QF-2','O 2.',
+    'QF-3','O 3.','SF-1','O 4.',
+    'SF-2','O 5.','F-1','O 6.','F-2'
   ];
   const liga3Rounds = [
     ...Array.from({length:rounds3}, (_,i) => (i+1)+'. kolo'),
-    'Osmina finala (1.)','Liga za obst. 1.',
-    'Osmina finala (2.)','Liga za obst. 2.',
-    'Četrtfinale (1.)','Liga za obst. 3.',
-    'Četrtfinale (2.)','Liga za obst. 4.',
-    'Polfinale (1.)','Polfinale (2.)','Polfinale (3.)',
-    'Finale (1.)','Finale (2.)','Finale (3.)'
+    '1/8-1','O 1.',
+    '1/8-2','O 2.',
+    'QF-1','O 3.',
+    'QF-2','O 4.',
+    'SF-1','SF-2','SF-3',
+    'F-1','F-2','F-3'
   ];
 
   const data = {
