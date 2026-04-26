@@ -861,6 +861,7 @@ tr.avg-row td:first-child {
     </div>
     <div class="nav-right">
       <div class="admin-badge admin-only" style="display:none" id="admin-badge">⚙️ Admin</div>
+      <div id="last-updated" class="desktop-only" style="font-size:11px;color:var(--text3);white-space:nowrap"></div>
       <button class="logout-btn desktop-only" onclick="fetchAndRefresh()" title="Osveži podatke iz Google Sheets" style="border-color:var(--gold);color:var(--gold)">⟳ Osveži</button>
       <button class="logout-btn desktop-only" onclick="logout()">Izhod</button>
       <button class="hamburger-btn" onclick="toggleMobileMenu()" id="hamburger-btn" aria-label="Meni">
@@ -1262,7 +1263,13 @@ tr.avg-row td:first-child {
         <div style="font-size:12px; color:var(--text2); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px" id="modal-liga-label"></div>
         <div class="team-modal-name" id="modal-team-name"></div>
       </div>
-      <button class="close-btn" onclick="closeTeamModal()">✕</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="modal-share-btn" title="Kopiraj link" onclick="shareTeamLink()"
+          style="padding:6px 12px;background:var(--gold-dim);border:1px solid rgba(240,165,0,0.3);border-radius:var(--radius-sm);color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+          🔗 Deli
+        </button>
+        <button class="close-btn" onclick="closeTeamModal()">✕</button>
+      </div>
     </div>
     <div class="team-stats" id="modal-stats"></div>
     <div style="font-size:12px; color:var(--text2); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px">Obisk po kolih</div>
@@ -1414,6 +1421,7 @@ function loginGuest() {
   showApiBannerIfNeeded();
   renderAll();
   fetchAndRefresh(); // Takoj naloži sveže podatke
+  handleUrlParams();
 }
 
 function openPwdModal() {
@@ -1438,6 +1446,7 @@ function checkPwd() {
     showApiBannerIfNeeded();
     renderAll();
     fetchAndRefresh(); // Takoj naloži sveže podatke
+    handleUrlParams();
   } else {
     document.getElementById('pwd-error').classList.add('show');
     document.getElementById('pwd-input').value = '';
@@ -1815,6 +1824,12 @@ function openTeamModal(lgName, teamName) {
   const lg = LEAGUE_DATA[lgName];
   const team = lg.teams.find(t => t.name === teamName);
   if (!team) return;
+  currentModalTeam = teamName;
+  currentModalLiga = lgName;
+  // Posodobi URL
+  const url = new URL(window.location);
+  url.searchParams.set('klub', encodeURIComponent(teamName));
+  window.history.replaceState({}, '', url);
 
   const s = teamStats(team.data);
   const maxIdx = team.data.indexOf(Math.max(...team.data.filter(v=>v!==null)));
@@ -1879,6 +1894,38 @@ function openTeamModal(lgName, teamName) {
 function closeTeamModal() {
   document.getElementById('team-modal').classList.remove('open');
   if (teamChart) { teamChart.destroy(); teamChart = null; }
+  // Počisti URL parameter
+  const url = new URL(window.location);
+  url.searchParams.delete('klub');
+  window.history.replaceState({}, '', url);
+}
+
+let currentModalTeam = null;
+let currentModalLiga = null;
+
+function shareTeamLink() {
+  const url = new URL(window.location);
+  url.searchParams.set('klub', encodeURIComponent(currentModalTeam));
+  const fullUrl = url.toString();
+
+  // Kopiraj v odložišče
+  navigator.clipboard.writeText(fullUrl).then(() => {
+    const btn = document.getElementById('modal-share-btn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Kopirano!';
+    btn.style.background = 'var(--green-dim)';
+    btn.style.borderColor = 'rgba(16,185,129,0.3)';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = 'var(--gold-dim)';
+      btn.style.borderColor = 'rgba(240,165,0,0.3)';
+      btn.style.color = 'var(--gold)';
+    }, 2000);
+  }).catch(() => {
+    // Fallback za starejše brskalnike
+    prompt('Kopiraj link:', fullUrl);
+  });
 }
 document.getElementById('team-modal').addEventListener('click', e => {
   if (e.target === document.getElementById('team-modal')) closeTeamModal();
@@ -2147,6 +2194,14 @@ async function fetchAndRefresh() {
     setTimeout(() => { if(statusEl) statusEl.textContent = ''; }, 4000);
   }
   document.getElementById('api-banner').style.display = 'none';
+
+  // Posodobi čas zadnje osvežitve
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('sl-SI', { day: 'numeric', month: 'short', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit' });
+  const updEl = document.getElementById('last-updated');
+  if (updEl) updEl.textContent = '⟳ ' + dateStr + ' ' + timeStr;
+
   renderAll();
 }
 
@@ -3037,6 +3092,30 @@ function switchSeason(season) {
   // Posodobi badge
   const badge = document.querySelector('.login-badge');
   if (badge) badge.textContent = '🏀 Sezona ' + season;
+}
+
+// ══════════ URL PARAMETRI ══════════
+function handleUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  const klub = params.get('klub');
+  if (klub) {
+    // Najdi ekipo
+    for (const [lgName, lg] of Object.entries(LEAGUE_DATA)) {
+      const team = lg.teams.find(t => t.name.toLowerCase() === decodeURIComponent(klub).toLowerCase());
+      if (team) {
+        // Počakaj da se app naloži nato odpri modal
+        setTimeout(() => openTeamModal(lgName, team.name), 500);
+        break;
+      }
+    }
+  }
+
+  const liga = params.get('liga');
+  if (liga) {
+    const viewMap = { '1': 'liga1', '2': 'liga2', '3': 'liga3' };
+    const view = viewMap[liga];
+    if (view) setTimeout(() => switchTab(view), 100);
+  }
 }
 
 // Inicializacija
