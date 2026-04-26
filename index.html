@@ -865,6 +865,9 @@ tr.avg-row td:first-child {
         <small>Administrator</small>
         Vnos podatkov
       </div>
+      <button class="btn btn-primary" onclick="openNovaSezonaModal()" style="display:flex;align-items:center;gap:8px">
+        🗓️ Nova sezona
+      </button>
     </div>
 
     <div class="card admin-section">
@@ -1786,6 +1789,156 @@ function renderAll() {
   if (isAdmin) renderAdminTable();
 }
 
+// ══════════ NOVA SEZONA ══════════
+let novaSezonaKlubi = []; // { name, liga, remove }
+
+function openNovaSezonaModal() {
+  // Predpopulaj z vsemi trenutnimi klubi
+  novaSezonaKlubi = [];
+  Object.entries(LEAGUE_DATA).forEach(([lgName, lg]) => {
+    lg.teams.forEach(t => {
+      novaSezonaKlubi.push({ name: t.name, liga: lgName });
+    });
+  });
+
+  // Predlagaj naslednjo sezono
+  const cur = document.getElementById('season-select').value;
+  const parts = cur.split('/');
+  const nextYear = parseInt(parts[1]) + 1;
+  const nextSeason = (parseInt(parts[1])) + '/' + nextYear;
+  document.getElementById('nova-sezona-name').value = nextSeason;
+
+  renderNovaSezonaKlubi();
+  document.getElementById('nova-sezona-modal').style.display = 'flex';
+}
+
+function closeNovaSezonaModal() {
+  document.getElementById('nova-sezona-modal').style.display = 'none';
+  document.getElementById('nova-sezona-status').textContent = '';
+}
+
+function renderNovaSezonaKlubi() {
+  const container = document.getElementById('nova-sezona-clubs');
+  const ligaColors = { '1. liga': 'var(--blue)', '2. liga': 'var(--green)', '3. liga': 'var(--amber)' };
+
+  container.innerHTML = novaSezonaKlubi.map((k, i) => {
+    const col = ligaColors[k.liga] || 'var(--text2)';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg2);border-radius:var(--radius-sm);border:1px solid var(--border)">'
+      + '<div style="width:8px;height:8px;border-radius:50%;background:' + col + ';flex-shrink:0"></div>'
+      + '<span style="flex:1;font-size:13px;font-weight:500">' + k.name + '</span>'
+      + '<select data-idx="' + i + '" onchange="spremembaLige(this)"'
+      + ' style="background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-family:DM Sans,sans-serif;outline:none;">'
+      + '<option value="1. liga"' + (k.liga==='1. liga'?' selected':'') + '>1. Liga</option>'
+      + '<option value="2. liga"' + (k.liga==='2. liga'?' selected':'') + '>2. Liga</option>'
+      + '<option value="3. liga"' + (k.liga==='3. liga'?' selected':'') + '>3. Liga</option>'
+      + '<option value="izpusti"' + (k.liga==='izpusti'?' selected':'') + '>— Izpusti —</option>'
+      + '</select>'
+      + '<button onclick="odstraniKlub(' + i + ')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:4px" title="Odstrani">✕</button>'
+      + '</div>';
+  }).join('');
+}
+
+function spremembaLige(sel) {
+  const i = parseInt(sel.dataset.idx);
+  novaSezonaKlubi[i].liga = sel.value;
+  renderNovaSezonaKlubi();
+}
+
+function odstraniKlub(i) {
+  novaSezonaKlubi.splice(i, 1);
+  renderNovaSezonaKlubi();
+}
+
+function dodajNoviKlub() {
+  const name = document.getElementById('novi-klub-name').value.trim();
+  const liga = document.getElementById('novi-klub-liga').value;
+  if (!name) return;
+  novaSezonaKlubi.push({ name, liga });
+  document.getElementById('novi-klub-name').value = '';
+  renderNovaSezonaKlubi();
+}
+
+async function ustvariNovoSezono() {
+  const status = document.getElementById('nova-sezona-status');
+  const sezonaName = document.getElementById('nova-sezona-name').value.trim();
+  if (!sezonaName) {
+    status.textContent = '⚠️ Vnesi ime sezone!';
+    status.className = 'save-status err';
+    return;
+  }
+
+  const rounds1 = parseInt(document.getElementById('rounds-liga1').value);
+  const rounds2 = parseInt(document.getElementById('rounds-liga2').value);
+  const rounds3 = parseInt(document.getElementById('rounds-liga3').value);
+
+  const aktivni = novaSezonaKlubi.filter(k => k.liga !== 'izpusti');
+  if (!aktivni.length) {
+    status.textContent = '⚠️ Ni klubov!';
+    status.className = 'save-status err';
+    return;
+  }
+
+  status.textContent = '⏳ Ustvarjam zavihke v Google Sheets...';
+  status.className = 'save-status';
+
+  // Pošlji na Apps Script
+  const params = new URLSearchParams({
+    action: 'newSeason',
+    season: sezonaName,
+    rounds1, rounds2, rounds3,
+    teams: JSON.stringify(aktivni)
+  });
+  await pingAppsScript(params);
+  await new Promise(r => setTimeout(r, 2000));
+
+  // Posodobi aplikacijo lokalno
+  const newLeagueData = buildNewSeasonData(sezonaName, aktivni, rounds1, rounds2, rounds3);
+
+  // Dodaj v season selector
+  const sel = document.getElementById('season-select');
+  const existing = Array.from(sel.options).map(o => o.value);
+  if (!existing.includes(sezonaName)) {
+    const opt = document.createElement('option');
+    opt.value = sezonaName;
+    opt.textContent = sezonaName + ' ★';
+    sel.insertBefore(opt, sel.firstChild);
+    // Shrani staro sezono v zgodovino
+    HISTORICAL_SEASONS[document.getElementById('season-select').value] = JSON.parse(JSON.stringify(LEAGUE_DATA));
+  }
+
+  // Nastavi novo sezono kot aktivno
+  sel.value = sezonaName;
+  activeSeason = sezonaName;
+  Object.assign(LEAGUE_DATA, newLeagueData);
+  renderAll();
+
+  status.textContent = '✓ Sezona ' + sezonaName + ' ustvarjena! Zavihki dodani v Google Sheets.';
+  status.className = 'save-status ok';
+
+  setTimeout(() => {
+    closeNovaSezonaModal();
+    status.textContent = '';
+  }, 3000);
+}
+
+function buildNewSeasonData(season, teams, rounds1, rounds2, rounds3) {
+  const roundsMap = { '1. liga': rounds1, '2. liga': rounds2, '3. liga': rounds3 };
+  const data = {
+    '1. liga': { color:'#3b82f6', colorDim:'rgba(59,130,246,0.12)', ligaClass:'liga-1', dotClass:'dot-liga-1',
+      rounds: Array.from({length:rounds1}, (_,i) => (i+1)+'. kolo'), teams: [] },
+    '2. liga': { color:'#10b981', colorDim:'rgba(16,185,129,0.12)', ligaClass:'liga-2', dotClass:'dot-liga-2',
+      rounds: Array.from({length:rounds2}, (_,i) => (i+1)+'. kolo'), teams: [] },
+    '3. liga': { color:'#f59e0b', colorDim:'rgba(245,158,11,0.12)', ligaClass:'liga-3', dotClass:'dot-liga-3',
+      rounds: Array.from({length:rounds3}, (_,i) => (i+1)+'. kolo'), teams: [] },
+  };
+  teams.forEach(t => {
+    if (data[t.liga]) {
+      data[t.liga].teams.push({ name: t.name, data: Array(roundsMap[t.liga]).fill(null) });
+    }
+  });
+  return data;
+}
+
 // ══════════ STATISTIKA ══════════
 let primerjavaChart = null;
 let trendChart = null;
@@ -2084,5 +2237,71 @@ function switchSeason(season) {
 // Inicializacija
 renderAll();
 </script>
+<!-- ══════════ NOVA SEZONA MODAL ══════════ -->
+<div id="nova-sezona-modal" style="position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);padding:20px;">
+  <div style="background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);padding:32px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;animation:fadeUp 0.2s ease both">
+    
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div>
+        <div style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Administrator</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:0.03em">Nova sezona</div>
+      </div>
+      <button class="close-btn" onclick="closeNovaSezonaModal()">✕</button>
+    </div>
+
+    <!-- Season name -->
+    <div style="margin-bottom:20px">
+      <label style="display:block;font-size:11px;color:var(--text2);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">Ime sezone</label>
+      <input type="text" id="nova-sezona-name" placeholder="npr. 2026/27"
+        style="width:200px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-size:15px;font-family:'DM Sans',sans-serif;outline:none;">
+    </div>
+
+    <!-- Rounds config -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+      <div>
+        <label style="display:block;font-size:11px;color:var(--blue);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">1. liga — kol</label>
+        <input type="number" id="rounds-liga1" value="27" min="1" max="40"
+          style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;color:var(--green);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">2. liga — kol</label>
+        <input type="number" id="rounds-liga2" value="22" min="1" max="40"
+          style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;color:var(--amber);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">3. liga — kol</label>
+        <input type="number" id="rounds-liga3" value="18" min="1" max="40"
+          style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;">
+      </div>
+    </div>
+
+    <!-- Club list -->
+    <div style="font-size:11px;color:var(--text2);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Klubi — razporeditev za novo sezono</div>
+    <div id="nova-sezona-clubs" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;max-height:320px;overflow-y:auto;padding-right:4px"></div>
+
+    <!-- Add club -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+      <input type="text" id="novi-klub-name" placeholder="Ime novega kluba"
+        style="flex:1;min-width:180px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;">
+      <select id="novi-klub-liga"
+        style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;">
+        <option value="1. liga">1. Liga</option>
+        <option value="2. liga">2. Liga</option>
+        <option value="3. liga" selected>3. Liga</option>
+      </select>
+      <button class="btn btn-ghost" onclick="dodajNoviKlub()">+ Dodaj klub</button>
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:20px">
+      <button class="btn btn-primary" onclick="ustvariNovoSezono()" style="gap:8px">
+        🚀 Ustvari novo sezono
+      </button>
+      <button class="btn btn-ghost" onclick="closeNovaSezonaModal()">Prekliči</button>
+      <span id="nova-sezona-status" class="save-status"></span>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
