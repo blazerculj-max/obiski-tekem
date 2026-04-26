@@ -1587,6 +1587,16 @@ async function hitriVnos() {
   }
 }
 
+function pingAppsScript(params) {
+  // Image trick — bypasses CORS/CORB popolnoma
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = img.onerror = () => resolve(true);
+    img.src = CONFIG.APPS_SCRIPT_URL + '?' + params.toString() + '&_=' + Date.now();
+    setTimeout(() => resolve(true), 4000); // fallback timeout
+  });
+}
+
 async function saveSingleCell(liga, teamName, roundIdx, val) {
   try {
     const params = new URLSearchParams({
@@ -1596,8 +1606,7 @@ async function saveSingleCell(liga, teamName, roundIdx, val) {
       round: roundIdx,
       val: val
     });
-    await fetch(`${CONFIG.APPS_SCRIPT_URL}?${params.toString()}`, { mode: 'no-cors' });
-    await new Promise(r => setTimeout(r, 1000));
+    await pingAppsScript(params);
     return true;
   } catch(e) {
     console.error('saveSingleCell error:', e);
@@ -1667,7 +1676,7 @@ async function saveAdminData() {
       liga: lgName,
       cells: JSON.stringify(cells)
     });
-    await fetch(`${CONFIG.APPS_SCRIPT_URL}?${params.toString()}`, { mode: 'no-cors' });
+    await pingAppsScript(params);
     await new Promise(r => setTimeout(r, 1500));
     await fetchAndRefresh();
     status.textContent = '✓ Shranjeno in posodobljeno!';
