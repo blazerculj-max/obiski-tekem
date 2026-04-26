@@ -680,7 +680,6 @@ tr.avg-row td:first-child {
                padding:6px 12px; color:var(--gold); font-size:12px; font-weight:600;
                font-family:'DM Sans',sans-serif; outline:none; cursor:pointer;">
         <option value="2025/26">2025/26 ★</option>
-        <option value="2024/25">2024/25</option>
       </select>
     </div>
     <div class="nav-tabs">
@@ -1922,18 +1921,54 @@ async function ustvariNovoSezono() {
 }
 
 function buildNewSeasonData(season, teams, rounds1, rounds2, rounds3) {
-  const roundsMap = { '1. liga': rounds1, '2. liga': rounds2, '3. liga': rounds3 };
+  // Redni del + avtomatska playoff struktura po ligi
+  const liga1Rounds = [
+    ...Array.from({length:rounds1}, (_,i) => (i+1)+'. kolo'),
+    'Četrtfinale (1.)','Četrtfinale (2.)','Četrtfinale (3.)',
+    'Polfinale (1.)','Polfinale (2.)','Polfinale (3.)',
+    'Finale (1.)','Finale (2.)','Finale (3.)','Finale (4.)','Finale (5.)'
+  ];
+  const liga2Rounds = [
+    ...Array.from({length:rounds2}, (_,i) => (i+1)+'. kolo'),
+    'Četrtfinale (1.)','Liga za obst. 1.','Četrtfinale (2.)','Liga za obst. 2.',
+    'Četrtfinale (3.)','Liga za obst. 3.','Polfinale (1.)','Liga za obst. 4.',
+    'Polfinale (2.)','Liga za obst. 5.','Finale (1.)','Liga za obst. 6.','Finale (2.)'
+  ];
+  const liga3Rounds = [
+    ...Array.from({length:rounds3}, (_,i) => (i+1)+'. kolo'),
+    'Osmina finala (1.)','Liga za obst. 1.',
+    'Osmina finala (2.)','Liga za obst. 2.',
+    'Četrtfinale (1.)','Liga za obst. 3.',
+    'Četrtfinale (2.)','Liga za obst. 4.',
+    'Polfinale (1.)','Polfinale (2.)','Polfinale (3.)',
+    'Finale (1.)','Finale (2.)','Finale (3.)'
+  ];
+
   const data = {
-    '1. liga': { color:'#3b82f6', colorDim:'rgba(59,130,246,0.12)', ligaClass:'liga-1', dotClass:'dot-liga-1',
-      rounds: Array.from({length:rounds1}, (_,i) => (i+1)+'. kolo'), teams: [] },
-    '2. liga': { color:'#10b981', colorDim:'rgba(16,185,129,0.12)', ligaClass:'liga-2', dotClass:'dot-liga-2',
-      rounds: Array.from({length:rounds2}, (_,i) => (i+1)+'. kolo'), teams: [] },
-    '3. liga': { color:'#f59e0b', colorDim:'rgba(245,158,11,0.12)', ligaClass:'liga-3', dotClass:'dot-liga-3',
-      rounds: Array.from({length:rounds3}, (_,i) => (i+1)+'. kolo'), teams: [] },
+    '1. liga': {
+      color:'#3b82f6', colorDim:'rgba(59,130,246,0.12)', ligaClass:'liga-1', dotClass:'dot-liga-1',
+      rounds: liga1Rounds, playoffStart: rounds1,
+      playoffCols: [0,1,2,3,4,5,6,7,8,9,10],
+      teams: []
+    },
+    '2. liga': {
+      color:'#10b981', colorDim:'rgba(16,185,129,0.12)', ligaClass:'liga-2', dotClass:'dot-liga-2',
+      rounds: liga2Rounds, playoffStart: rounds2,
+      playoffCols: [0,2,4,6,8,10,12], obstanekCols: [1,3,5,7,9,11],
+      teams: []
+    },
+    '3. liga': {
+      color:'#f59e0b', colorDim:'rgba(245,158,11,0.12)', ligaClass:'liga-3', dotClass:'dot-liga-3',
+      rounds: liga3Rounds, playoffStart: rounds3,
+      playoffCols: [0,2,4,6,8,9,10,11,12,13], obstanekCols: [1,3,5,7],
+      teams: []
+    },
   };
+
+  const totalRounds = { '1. liga': liga1Rounds.length, '2. liga': liga2Rounds.length, '3. liga': liga3Rounds.length };
   teams.forEach(t => {
     if (data[t.liga]) {
-      data[t.liga].teams.push({ name: t.name, data: Array(roundsMap[t.liga]).fill(null) });
+      data[t.liga].teams.push({ name: t.name, data: Array(totalRounds[t.liga]).fill(null) });
     }
   });
   return data;
@@ -2174,36 +2209,7 @@ function renderTrend() {
 }
 
 // ══════════ MULTI-SEZONA ══════════
-const HISTORICAL_SEASONS = {
-  '2024/25': {
-    '1. liga': {
-      color: '#3b82f6', colorDim: 'rgba(59,130,246,0.12)', ligaClass: 'liga-1', dotClass: 'dot-liga-1',
-      rounds: Array.from({length:27}, (_,i) => `${i+1}. kolo`),
-      teams: [
-        { name:'Ece Triglav Kranj', data:Array(27).fill(null) },
-        { name:'GGD Šenčur', data:Array(27).fill(null) },
-        { name:'Hopsi Polzela', data:Array(27).fill(null) },
-        { name:'Ilirija', data:Array(27).fill(null) },
-        { name:'Kansai Helios Domžale', data:Array(27).fill(null) },
-        { name:'Krka', data:Array(27).fill(null) },
-        { name:'Laško', data:Array(27).fill(null) },
-        { name:'Rogaška', data:Array(27).fill(null) },
-        { name:'Terme Olimia Podčetrtek', data:Array(27).fill(null) },
-        { name:'Šentjur', data:Array(27).fill(null) },
-      ]
-    },
-    '2. liga': {
-      color: '#10b981', colorDim: 'rgba(16,185,129,0.12)', ligaClass: 'liga-2', dotClass: 'dot-liga-2',
-      rounds: Array.from({length:22}, (_,i) => `${i+1}. kolo`),
-      teams: []
-    },
-    '3. liga': {
-      color: '#f59e0b', colorDim: 'rgba(245,158,11,0.12)', ligaClass: 'liga-3', dotClass: 'dot-liga-3',
-      rounds: Array.from({length:18}, (_,i) => `${i+1}. kolo`),
-      teams: []
-    }
-  }
-};
+const HISTORICAL_SEASONS = {};
 
 let activeSeason = '2025/26';
 // Shrani original 25/26 data
@@ -2259,17 +2265,17 @@ renderAll();
     <!-- Rounds config -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
       <div>
-        <label style="display:block;font-size:11px;color:var(--blue);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">1. liga — kol</label>
+        <label style="display:block;font-size:11px;color:var(--blue);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">1. liga — kol (redni del)</label>
         <input type="number" id="rounds-liga1" value="27" min="1" max="40"
           style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;">
       </div>
       <div>
-        <label style="display:block;font-size:11px;color:var(--green);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">2. liga — kol</label>
+        <label style="display:block;font-size:11px;color:var(--green);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">2. liga — kol (redni del)</label>
         <input type="number" id="rounds-liga2" value="22" min="1" max="40"
           style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;">
       </div>
       <div>
-        <label style="display:block;font-size:11px;color:var(--amber);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">3. liga — kol</label>
+        <label style="display:block;font-size:11px;color:var(--amber);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">3. liga — kol (redni del)</label>
         <input type="number" id="rounds-liga3" value="18" min="1" max="40"
           style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;">
       </div>
