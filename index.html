@@ -688,6 +688,7 @@ tr.avg-row td:first-child {
       <button class="nav-tab" data-view="liga1">1. Liga</button>
       <button class="nav-tab" data-view="liga2">2. Liga</button>
       <button class="nav-tab" data-view="liga3">3. Liga</button>
+      <button class="nav-tab" data-view="statistika">Statistika</button>
       <button class="nav-tab admin-only" data-view="admin" style="display:none">Admin</button>
     </div>
     <div class="nav-right">
@@ -719,6 +720,7 @@ tr.avg-row td:first-child {
 
     <div class="stats-row" id="global-stats"></div>
 
+    <div id="rekordna-kola-row" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px"></div>
     <div class="skupaj-grid">
       <div class="card">
         <div class="card-title">Vse ekipe — po obisku</div>
@@ -775,6 +777,85 @@ tr.avg-row td:first-child {
     </div>
     <div id="liga3-stats" class="stats-row"></div>
     <div class="table-wrap" id="liga3-table"></div>
+  </div>
+
+  <!-- ── STATISTIKA VIEW ── -->
+  <div class="view" id="view-statistika">
+    <div class="page-header">
+      <div class="page-title">
+        <small>Sezona 2025/26</small>
+        Statistika
+      </div>
+    </div>
+
+    <!-- REKORDI -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">🏆 Rekord obiskanosti — Top 20 tekem</div>
+      <div class="table-wrap" style="border:none; border-radius:0; background:transparent;">
+        <table id="rekord-table" style="table-layout:auto">
+          <thead><tr>
+            <th style="width:36px; position:sticky; left:0; background:var(--bg2)">#</th>
+            <th style="text-align:left; padding-left:12px; position:sticky; left:36px; background:var(--bg2); min-width:180px">Ekipa</th>
+            <th>Liga</th>
+            <th>Kolo</th>
+            <th>Gledalci</th>
+          </tr></thead>
+          <tbody id="rekord-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REKORDNO KOLO PO LIGI -->
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px">
+      <div class="card" id="rekord-liga1">
+        <div class="card-title" style="color:var(--blue)">1. Liga — Rekordno kolo</div>
+        <div id="rekord-liga1-content"></div>
+      </div>
+      <div class="card" id="rekord-liga2">
+        <div class="card-title" style="color:var(--green)">2. Liga — Rekordno kolo</div>
+        <div id="rekord-liga2-content"></div>
+      </div>
+      <div class="card" id="rekord-liga3">
+        <div class="card-title" style="color:var(--amber)">3. Liga — Rekordno kolo</div>
+        <div id="rekord-liga3-content"></div>
+      </div>
+    </div>
+
+    <!-- PRIMERJAVA DVEH KLUBOV -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">⚔️ Primerjava klubov</div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px">
+        <div class="form-group" style="min-width:180px">
+          <label>Klub 1</label>
+          <select id="cmp-team1" onchange="renderPrimerjava()" style="width:100%; background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:8px 12px; color:var(--text); font-size:13px; outline:none;">
+            <option value="">— izberi —</option>
+          </select>
+        </div>
+        <div class="form-group" style="min-width:180px">
+          <label>Klub 2</label>
+          <select id="cmp-team2" onchange="renderPrimerjava()" style="width:100%; background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:8px 12px; color:var(--text); font-size:13px; outline:none;">
+            <option value="">— izberi —</option>
+          </select>
+        </div>
+      </div>
+      <div class="chart-container" style="height:280px">
+        <canvas id="primerjava-chart"></canvas>
+      </div>
+      <div id="primerjava-stats" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px"></div>
+    </div>
+
+    <!-- TREND OBISKA (samo domače tekme) -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">📈 Trend obiska po kolu <span style="font-size:11px; color:var(--text3); font-family:DM Sans">(povprečje vseh ekip)</span></div>
+      <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap" id="trend-liga-btns">
+        <button class="toggle-btn active" onclick="setTrendLiga('1. liga', this)" style="padding:6px 14px; border-radius:20px; border:1px solid var(--blue); background:var(--blue-dim); color:var(--blue); font-size:12px; font-weight:600; cursor:pointer;">1. Liga</button>
+        <button class="toggle-btn" onclick="setTrendLiga('2. liga', this)" style="padding:6px 14px; border-radius:20px; border:1px solid var(--border); background:none; color:var(--text2); font-size:12px; font-weight:600; cursor:pointer;">2. Liga</button>
+        <button class="toggle-btn" onclick="setTrendLiga('3. liga', this)" style="padding:6px 14px; border-radius:20px; border:1px solid var(--border); background:none; color:var(--text2); font-size:12px; font-weight:600; cursor:pointer;">3. Liga</button>
+      </div>
+      <div class="chart-container" style="height:280px">
+        <canvas id="trend-chart"></canvas>
+      </div>
+    </div>
   </div>
 
   <!-- ── ADMIN VIEW ── -->
@@ -1075,7 +1156,9 @@ function switchTab(view) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelector(`[data-view="${view}"]`).classList.add('active');
-  document.getElementById(`view-${view.replace('liga','liga')}`).classList.add('active');
+  document.getElementById(`view-${view}`).classList.add('active');
+  if (view === 'statistika') renderStatistika();
+  if (view === 'admin' && isAdmin) renderAdminTable();
 }
 document.querySelectorAll('.nav-tab').forEach(tab => {
   tab.addEventListener('click', () => switchTab(tab.dataset.view));
@@ -1155,6 +1238,37 @@ function renderSkupaj() {
 
   renderLigaCompareChart();
   renderTop10Chart(ranking.slice(0,10));
+  renderRekordnaKolaSkupaj();
+}
+
+function renderRekordnaKolaSkupaj() {
+  const el = document.getElementById('rekordna-kola-row');
+  if (!el) return;
+  el.innerHTML = ['1. liga','2. liga','3. liga'].map(lgName => {
+    const lg = LEAGUE_DATA[lgName];
+    const koloTotals = lg.rounds.map((round, ri) => {
+      const vals = lg.teams.map(t => t.data[ri]).filter(v => v !== null && v !== undefined);
+      return { round, total: vals.reduce((a,b)=>a+b,0), count: vals.length };
+    }).filter(k => k.count > 0);
+    if (!koloTotals.length) return '<div class="card"><div class="card-title" style="color:' + lg.color + '">' + lgName + ' — Rekordno kolo</div><div style="color:var(--text3);font-size:13px">Ni podatkov</div></div>';
+    koloTotals.sort((a,b) => b.total - a.total);
+    const top = koloTotals[0];
+    const ri = lg.rounds.indexOf(top.round);
+    const roundVals = lg.teams.map(t => ({name:t.name, val:t.data[ri]})).filter(v => v.val !== null && v.val !== undefined);
+    roundVals.sort((a,b) => b.val - a.val);
+    const best = roundVals[0];
+    const bestHtml = best
+      ? '<div style="margin-top:8px;padding:8px;background:var(--bg2);border-radius:var(--radius-sm)"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em">Največ v tem kolu</div><div style="font-size:13px;font-weight:600;margin-top:2px">' + best.name + '</div><div style="font-family:Bebas Neue,sans-serif;font-size:20px;color:' + lg.color + '">' + fmtNum(best.val) + '</div></div>'
+      : '';
+    return '<div class="card" style="border-color:' + lg.color + '33">'
+      + '<div style="font-size:11px;color:' + lg.color + ';text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:8px">' + lgName + '</div>'
+      + '<div style="font-family:Bebas Neue,sans-serif;font-size:13px;color:var(--text2);letter-spacing:0.05em">Rekordno kolo</div>'
+      + '<div style="font-family:Bebas Neue,sans-serif;font-size:28px;color:' + lg.color + ';line-height:1">' + top.round + '</div>'
+      + '<div style="font-family:Bebas Neue,sans-serif;font-size:36px;color:var(--text);line-height:1.1">' + fmtNum(top.total) + '</div>'
+      + '<div style="font-size:11px;color:var(--text3);margin-top:4px">gledalcev skupaj · ' + top.count + ' tekem</div>'
+      + bestHtml
+      + '</div>';
+  }).join('');
 }
 
 function renderLigaCompareChart() {
@@ -1658,6 +1772,240 @@ function renderAll() {
   renderLeagueTable('2. liga', 'liga2-table', 'liga2-stats');
   renderLeagueTable('3. liga', 'liga3-table', 'liga3-stats');
   if (isAdmin) renderAdminTable();
+}
+
+// ══════════ STATISTIKA ══════════
+let primerjavaChart = null;
+let trendChart = null;
+let trendLiga = '1. liga';
+
+function renderStatistika() {
+  renderRekordi();
+  renderRekordnaKola();
+  populatePrimerjavaSelects();
+  renderTrend();
+}
+
+// ── Rekord tabela ──
+function renderRekordi() {
+  const all = [];
+  Object.entries(LEAGUE_DATA).forEach(([lgName, lg]) => {
+    lg.teams.forEach(team => {
+      team.data.forEach((val, ri) => {
+        if (val !== null && val !== undefined) {
+          all.push({ team: team.name, liga: lgName, kolo: lg.rounds[ri], val, lg });
+        }
+      });
+    });
+  });
+  all.sort((a,b) => b.val - a.val);
+  const top20 = all.slice(0, 20);
+
+  const tbody = document.getElementById('rekord-tbody');
+  tbody.innerHTML = top20.map((r, i) => `
+    <tr>
+      <td style="position:sticky;left:0;background:var(--card);font-family:'Bebas Neue',sans-serif;font-size:16px;color:${i<3?'var(--gold)':'var(--text3)'};width:36px">${i+1}</td>
+      <td style="text-align:left;padding-left:12px;position:sticky;left:36px;background:var(--card);font-weight:600;cursor:pointer" onclick="openTeamModal('${r.liga}','${r.team.replace(/'/g,"\'")}')">
+        ${r.team}
+      </td>
+      <td><span class="league-badge ${r.lg.ligaClass}" style="font-size:10px;padding:2px 8px">${r.liga}</span></td>
+      <td style="color:var(--text2);font-size:12px">${r.kolo}</td>
+      <td><span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:${r.lg.color}">${fmtNum(r.val)}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ── Rekordno kolo po ligi ──
+function renderRekordnaKola() {
+  ['1. liga', '2. liga', '3. liga'].forEach((lgName, i) => {
+    const lg = LEAGUE_DATA[lgName];
+    const ids = ['liga1', 'liga2', 'liga3'];
+    const el = document.getElementById(`rekord-${ids[i]}-content`);
+
+    // Seštej gledalce po kolu (samo kola kjer so podatki)
+    const koloTotals = lg.rounds.map((round, ri) => {
+      const vals = lg.teams.map(t => t.data[ri]).filter(v => v !== null && v !== undefined);
+      return { round, ri, total: vals.reduce((a,b)=>a+b,0), count: vals.length };
+    }).filter(k => k.count > 0);
+
+    if (!koloTotals.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px">Ni podatkov</div>'; return; }
+
+    koloTotals.sort((a,b) => b.total - a.total);
+    const top3 = koloTotals.slice(0,3);
+
+    el.innerHTML = top3.map((k, idx) => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:${idx===0?lg.color:'var(--text3)'};width:20px">${idx+1}</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600">${k.round}</div>
+          <div style="font-size:11px;color:var(--text3)">${k.count} tekem</div>
+        </div>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:${idx===0?lg.color:'var(--text2)'}">${fmtNum(k.total)}</span>
+      </div>
+    `).join('');
+  });
+}
+
+// ── Primerjava dveh klubov ──
+function populatePrimerjavaSelects() {
+  const all = [];
+  Object.entries(LEAGUE_DATA).forEach(([lgName, lg]) => {
+    lg.teams.forEach(t => all.push({ name: t.name, liga: lgName }));
+  });
+  all.sort((a,b) => a.name.localeCompare(b.name, 'sl'));
+
+  ['cmp-team1','cmp-team2'].forEach((id, idx) => {
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— izberi klub —</option>' +
+      all.map(t => `<option value="${t.liga}||${t.name}" ${cur===t.liga+'||'+t.name?'selected':''}>${t.name} (${t.liga})</option>`).join('');
+  });
+}
+
+function renderPrimerjava() {
+  const v1 = document.getElementById('cmp-team1').value;
+  const v2 = document.getElementById('cmp-team2').value;
+  if (!v1 || !v2 || v1 === v2) return;
+
+  const [lg1name, t1name] = v1.split('||');
+  const [lg2name, t2name] = v2.split('||');
+  const lg1 = LEAGUE_DATA[lg1name];
+  const lg2 = LEAGUE_DATA[lg2name];
+  const t1 = lg1.teams.find(t => t.name === t1name);
+  const t2 = lg2.teams.find(t => t.name === t2name);
+  if (!t1 || !t2) return;
+
+  const d1 = t1.data.map((v,i) => v!==null?{x:lg1.rounds[i],y:v}:null).filter(Boolean);
+  const d2 = t2.data.map((v,i) => v!==null?{x:lg2.rounds[i],y:v}:null).filter(Boolean);
+
+  const ctx = document.getElementById('primerjava-chart').getContext('2d');
+  if (primerjavaChart) primerjavaChart.destroy();
+  primerjavaChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: Array.from({length: Math.max(d1.length, d2.length)}, (_,i) => i+1),
+      datasets: [
+        {
+          label: t1name,
+          data: d1.map(d => d.y),
+          borderColor: lg1.color, backgroundColor: lg1.color+'22',
+          borderWidth: 2.5, pointRadius: 4, tension: 0.3, fill: false
+        },
+        {
+          label: t2name,
+          data: d2.map(d => d.y),
+          borderColor: lg2.color, backgroundColor: lg2.color+'22',
+          borderWidth: 2.5, pointRadius: 4, tension: 0.3, fill: false
+        }
+      ]
+    },
+    options: {
+      ...chartOptions(''),
+      plugins: {
+        ...chartOptions('').plugins,
+        legend: { display: true, labels: { color: '#8899b0', font: { size: 12 } } }
+      }
+    }
+  });
+
+  const s1 = teamStats(t1.data), s2 = teamStats(t2.data);
+  document.getElementById('primerjava-stats').innerHTML = `
+    <div class="stat-card" style="border-color:${lg1.color}33">
+      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">${t1name}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><div class="stat-val" style="font-size:22px;color:${lg1.color}">${fmtNum(s1.avg)}</div><div class="stat-label">Povp.</div></div>
+        <div><div class="stat-val" style="font-size:22px;color:${lg1.color}">${fmtNum(s1.max)}</div><div class="stat-label">Rekord</div></div>
+        <div><div class="stat-val" style="font-size:22px;color:${lg1.color}">${fmtNum(s1.total)}</div><div class="stat-label">Skupaj</div></div>
+        <div><div class="stat-val" style="font-size:22px;color:${lg1.color}">${s1.count}</div><div class="stat-label">Tekem</div></div>
+      </div>
+    </div>
+    <div class="stat-card" style="border-color:${lg2.color}33">
+      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">${t2name}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><div class="stat-val" style="font-size:22px;color:${lg2.color}">${fmtNum(s2.avg)}</div><div class="stat-label">Povp.</div></div>
+        <div><div class="stat-val" style="font-size:22px;color:${lg2.color}">${fmtNum(s2.max)}</div><div class="stat-label">Rekord</div></div>
+        <div><div class="stat-val" style="font-size:22px;color:${lg2.color}">${fmtNum(s2.total)}</div><div class="stat-label">Skupaj</div></div>
+        <div><div class="stat-val" style="font-size:22px;color:${lg2.color}">${s2.count}</div><div class="stat-label">Tekem</div></div>
+      </div>
+    </div>
+  `;
+}
+
+// ── Trend po kolu ──
+function setTrendLiga(lgName, btn) {
+  trendLiga = lgName;
+  document.querySelectorAll('#trend-liga-btns button').forEach(b => {
+    b.style.background = 'none';
+    b.style.color = 'var(--text2)';
+    b.style.borderColor = 'var(--border)';
+  });
+  const lg = LEAGUE_DATA[lgName];
+  btn.style.background = lg.colorDim;
+  btn.style.color = lg.color;
+  btn.style.borderColor = lg.color;
+  renderTrend();
+}
+
+function renderTrend() {
+  const lg = LEAGUE_DATA[trendLiga];
+  const points = lg.rounds.map((round, ri) => {
+    const vals = lg.teams.map(t => t.data[ri]).filter(v => v !== null && v !== undefined);
+    if (!vals.length) return null;
+    return { round, avg: Math.round(vals.reduce((a,b)=>a+b,0)/vals.length), total: vals.reduce((a,b)=>a+b,0) };
+  }).filter(Boolean);
+
+  const ctx = document.getElementById('trend-chart').getContext('2d');
+  if (trendChart) trendChart.destroy();
+
+  trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: points.map(p => p.round),
+      datasets: [
+        {
+          label: 'Povp. gledalci / tekmo',
+          data: points.map(p => p.avg),
+          borderColor: lg.color,
+          backgroundColor: lg.color + '22',
+          borderWidth: 2.5,
+          pointBackgroundColor: lg.color,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          tension: 0.3,
+          yAxisID: 'y'
+        },
+        {
+          label: 'Skupaj gledalci',
+          data: points.map(p => p.total),
+          borderColor: 'rgba(255,255,255,0.3)',
+          borderWidth: 1.5,
+          borderDash: [5,4],
+          pointRadius: 0,
+          fill: false,
+          tension: 0.3,
+          yAxisID: 'y1'
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, labels: { color: '#8899b0', font: { size: 11 } } },
+        tooltip: {
+          backgroundColor: '#1a2235',
+          borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
+          titleColor: '#e8edf5', bodyColor: '#8899b0',
+          callbacks: { label: ctx => ` ${fmtNum(ctx.parsed.y)} gledalcev` }
+        }
+      },
+      scales: {
+        x: { ticks: { color: '#4a5a70', font: { size: 10 }, maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { color: 'rgba(255,255,255,0.08)' } },
+        y: { ticks: { color: '#4a5a70', font: { size: 11 }, callback: v => fmtNum(v) }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { color: 'rgba(255,255,255,0.08)' }, title: { display: true, text: 'Povprečje', color: '#4a5a70', font: { size: 10 } } },
+        y1: { position: 'right', ticks: { color: '#4a5a70', font: { size: 11 }, callback: v => fmtNum(v) }, grid: { display: false }, border: { color: 'rgba(255,255,255,0.08)' }, title: { display: true, text: 'Skupaj', color: '#4a5a70', font: { size: 10 } } }
+      }
+    }
+  });
 }
 
 // ══════════ MULTI-SEZONA ══════════
